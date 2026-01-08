@@ -11,6 +11,7 @@ urlpatterns = [
     path('historia/', include('historia.urls')),
     path('contato/', include('contato.urls')),
     path('perfil/', include('perfil.urls')),
+    path('mensagens/', include('mensagens.urls')),
 ]
 
 # Servir arquivos de mídia e estáticos em desenvolvimento

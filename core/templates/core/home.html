@@ -32,6 +32,15 @@
             </a>
             {# fim galerias exclusivas #}
 
+            {# mensagens #}
+            {% if user.is_authenticated %}
+            <a href="{% url 'mensagens:lista_salas' %}" class="bg-surface p-4 md:p-8 rounded-lg border border-silver/10 hover:border-silver transition-all group text-center flex flex-col items-center justify-center">
+                <i class="fas fa-comments text-2xl md:text-3xl text-primary-purple mb-4"></i>
+                <h3 class="text-lg md:text-2xl font-bold uppercase tracking-tighter">Mensagens</h3>
+            </a>
+            {% endif %}
+            {# fim mensagens #}
+
             {# historia #}
             <a href="{% url 'historia:index' %}" class="bg-surface p-4 md:p-8 rounded-lg border border-silver/10 hover:border-silver transition-all group text-center flex flex-col items-center justify-center">
                 <i class="fas fa-book-open text-2xl md:text-3xl text-primary-purple mb-4"></i>

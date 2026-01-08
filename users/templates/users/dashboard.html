@@ -72,16 +72,34 @@
         {% endif %}
 
         {# Chat #}
-        <div class="card-surface p-6 rounded-lg bg-surface flex flex-col justify-between">
+        <div class="card-surface p-6 rounded-lg bg-surface flex flex-col justify-between relative overflow-hidden group">
+
+            {% if tem_mensagens_novas %}
+            <div class="absolute top-0 right-0 w-32 h-32 pointer-events-none">
+                <div class="absolute transform rotate-45 bg-error text-white text-[10px] font-bold py-1 px-10 right-[-35px] top-[20px] shadow-lg uppercase tracking-widest text-center">
+                    Mensagem
+                </div>
+            </div>
+            {% endif %}
+
             <div>
                 <div class="flex justify-between items-start mb-4">
-                    <i class="fas fa-comments text-primary-blue text-2xl"></i>
+                    <div class="relative">
+                        <i class="fas fa-comments text-primary-blue text-2xl {% if tem_mensagens_novas %}animate-bounce text-error{% endif %}"></i>
+                    </div>
                     <span class="text-[10px] bg-primary-blue px-2 py-0.5 rounded text-white uppercase font-bold">Real-time</span>
                 </div>
                 <h3 class="text-white font-bold uppercase text-sm mb-2">Canais de Chat</h3>
                 <p class="text-silver text-xs mb-6 leading-relaxed">Acesse as salas de bate-papo exclusivas.</p>
             </div>
-            <a href="#" class="block text-center py-2 bg-primary-blue hover:bg-blue-hover text-white font-bold text-xs uppercase tracking-widest transition-all">Acessar Chat</a>
+
+            <a href="{% url 'mensagens:lista_salas' %}" class="block text-center py-2 {% if tem_mensagens_novas %}bg-error animate-pulse{% else %}bg-primary-blue{% endif %} hover:opacity-90 text-white font-bold text-xs uppercase tracking-widest transition-all">
+                {% if tem_mensagens_novas %}
+                    Ler Novas Mensagens
+                {% else %}
+                    Acessar Chat
+                {% endif %}
+            </a>
         </div>
 
         {# Suporte Técnico #}

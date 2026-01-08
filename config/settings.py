@@ -35,6 +35,7 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
 # ==============================================================================
 
 INSTALLED_APPS = [
+    'daphne', # ASGI Server para WebSockets (deve ser o primeiro)
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -44,11 +45,13 @@ INSTALLED_APPS = [
     'django_browser_reload',
     'tailwind',
     'theme',
+    'channels', # Django Channels
     'core',
     'users',
     'historia',
     'contato',
     'perfil',
+    'mensagens',
 ]
 
 MIDDLEWARE = [
@@ -81,6 +84,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'config.wsgi.application'
+ASGI_APPLICATION = 'config.asgi.application' # Configuração ASGI
 
 # ==============================================================================
 # 3. BANCO DE DADOS (Configurado via environ)
@@ -170,3 +174,16 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+
+# ==============================================================================
+# 12. CHANNELS E REDIS
+# ==============================================================================
+
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('127.0.0.1', 6379)],
+        },
+    },
+}

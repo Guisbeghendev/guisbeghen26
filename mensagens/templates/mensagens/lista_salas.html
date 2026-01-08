@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block title %}Mensagens - GUISBEGHEN{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-8 py-16">
+    <h1 class="text-4xl font-bold text-primary-purple uppercase tracking-tighter mb-8">Canais de Chat</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for sala in salas %}
+            <a href="{% url 'mensagens:detalhe_sala' sala.id %}" class="bg-surface p-6 rounded-lg border border-silver/10 hover:border-primary-purple transition-all group flex items-center justify-between">
+                <div>
+                    <h3 class="text-white font-bold uppercase tracking-widest text-lg">{{ sala.nome_exibicao }}</h3>
+                    <p class="text-silver text-xs">Grupo: {{ sala.grupo.nome }}</p>
+                </div>
+                <i class="fas fa-chevron-right text-silver group-hover:text-primary-purple transition-colors"></i>
+            </a>
+        {% empty %}
+            <div class="col-span-full card-surface p-12 text-center bg-surface border border-silver/10">
+                <i class="fas fa-comments text-6xl text-silver/20 mb-4"></i>
+                <p class="text-silver italic">Você ainda não possui acesso a nenhum canal de chat.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
