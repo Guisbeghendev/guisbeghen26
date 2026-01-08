@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'users',
     'historia',
     'contato',
+    'perfil',
 ]
 
 MIDDLEWARE = [
