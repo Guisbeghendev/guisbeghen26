@@ -8,6 +8,7 @@ urlpatterns = [
     path('', include('core.urls')),
     path('users/', include('users.urls')),
     path("__reload__/", include("django_browser_reload.urls")),
+    path('historia/', include('historia.urls')),
 ]
 
 # Servir arquivos de mídia e estáticos em desenvolvimento

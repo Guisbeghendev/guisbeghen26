@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'theme',
     'core',
     'users',
+    'historia',
 ]
 
 MIDDLEWARE = [
