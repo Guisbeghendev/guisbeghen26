@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Meu Perfil - GUISBEGHEN{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-12">
+    <div class="max-w-4xl mx-auto">
+
+        <div class="mb-8">
+            <a href="{% url 'users:dashboard' %}" class="text-silver hover:text-white text-xs uppercase tracking-widest flex items-center gap-2 transition-colors">
+                <i class="fas fa-arrow-left"></i> Voltar ao Dashboard
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+            <div class="lg:col-span-1 space-y-6">
+                <div class="card-surface p-6 rounded-lg bg-surface text-center">
+                    <div class="relative inline-block mb-4">
+                        {% if user.profile.foto %}
+                            <img src="{{ user.profile.foto.url }}" alt="{{ user.username }}" class="w-32 h-32 rounded-full object-cover border-4 border-black ring-2 ring-primary-purple">
+                        {% else %}
+                            <div class="w-32 h-32 rounded-full bg-black border-2 border-silver/20 flex items-center justify-center">
+                                <i class="fas fa-user text-silver text-4xl"></i>
+                            </div>
+                        {% endif %}
+
+                        {% if user.profile.is_fotografo %}
+                            <span class="absolute bottom-0 right-0 bg-primary-purple text-white text-[10px] px-2 py-1 rounded-full border-2 border-black font-bold uppercase">PRO</span>
+                        {% endif %}
+                    </div>
+
+                    <h2 class="text-xl font-bold text-white">{{ user.profile.nome|default:user.username }} {{ user.profile.sobrenome|default:"" }}</h2>
+                    <p class="text-silver text-xs mb-4">@{{ user.username }} | {{ user.email }}</p>
+
+                    <div class="flex flex-wrap justify-center gap-2 mt-4">
+                        {% for grupo in user.grupos_audiencia.all %}
+                            <span class="badge-group text-[10px]">{{ grupo.nome }}</span>
+                        {% empty %}
+                            <span class="text-[10px] text-silver/40 uppercase">Sem Grupos</span>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <a href="{% url 'users:edit_profile' %}" class="block w-full text-center py-3 bg-primary-blue hover:bg-blue-hover text-white text-xs uppercase tracking-widest font-bold transition-all rounded">
+                    <i class="fas fa-edit mr-2"></i> Editar Dados
+                </a>
+            </div>
+
+            <div class="lg:col-span-2 space-y-6">
+
+                <div class="card-surface p-8 rounded-lg bg-surface">
+                    <h3 class="text-primary-purple font-bold uppercase tracking-widest text-sm mb-6 border-b border-silver/10 pb-2">Informações de Perfil</h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-4">
+                        <div>
+                            <label class="text-[10px] text-silver uppercase font-semibold">Nome Completo</label>
+                            <p class="text-white">
+                                {{ user.profile.nome|default:"--" }} {{ user.profile.sobrenome|default:"" }}
+                            </p>
+                        </div>
+
+                        <div>
+                            <label class="text-[10px] text-silver uppercase font-semibold">WhatsApp</label>
+                            <p class="text-white">{{ user.profile.whatsapp|default:"--" }}</p>
+                        </div>
+
+                        <div>
+                            <label class="text-[10px] text-silver uppercase font-semibold">Cidade / Estado</label>
+                            <p class="text-white">
+                                {% if user.profile.cidade %}{{ user.profile.cidade }}{% endif %}
+                                {% if user.profile.estado %} - {{ user.profile.estado }}{% endif %}
+                                {% if not user.profile.cidade and not user.profile.estado %}<span class="text-silver/30 italic">Não informado</span>{% endif %}
+                            </p>
+                        </div>
+
+                        <div>
+                            <label class="text-[10px] text-silver uppercase font-semibold">Data de Nascimento</label>
+                            <p class="text-white">{{ user.profile.data_nascimento|date:"d/m/Y"|default:"--" }}</p>
+                        </div>
+
+                        <div>
+                            <label class="text-[10px] text-silver uppercase font-semibold">Contato Alternativo</label>
+                            <p class="text-white">{{ user.profile.contato|default:"--" }}</p>
+                        </div>
+
+                        <div>
+                            <label class="text-[10px] text-silver uppercase font-semibold">Membro desde</label>
+                            <p class="text-white">{{ user.date_joined|date:"M Y" }}</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-8">
+                        <label class="text-[10px] text-silver uppercase font-semibold">Biografia</label>
+                        <p class="text-silver text-sm leading-relaxed mt-2 italic">
+                            {{ user.profile.biografia|default:"Nenhuma biografia disponível." }}
+                        </p>
+                    </div>
+                </div>
+
+                <div class="card-surface p-8 rounded-lg bg-surface opacity-80">
+                    <h3 class="text-silver font-bold uppercase tracking-widest text-xs mb-4">Informações Administrativas</h3>
+                    <label class="text-[10px] text-silver/60 uppercase font-semibold">Como você conhece o GuiSbeghen?</label>
+                    <p class="text-silver/60 text-xs mt-1">{{ user.profile.origem_contato|default:"Não registrado." }}</p>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

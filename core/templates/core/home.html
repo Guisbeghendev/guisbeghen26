@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}GuiSbeghen{% endblock %}
+
+{% block content %}
+<div class="bg-black text-white">
+
+    {# titulo #}
+    <section class="py-1 md:py-1">
+        <div class="container mx-auto px-1 text-center">
+            <img src="{% static 'images/logo_horiz7.png' %}" alt="Guisbeghen" class="mx-auto h-[200px] md:h-[350px] w-auto">
+        </div>
+    </section>
+    {# fim titulo #}
+
+    {# conteudo #}
+    <section class="container mx-auto px-4 py-8">
+        <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
+
+            {# historia #}
+            <div class="bg-surface p-4 md:p-8 rounded-lg border border-silver/10 hover:border-silver transition-all group text-center flex flex-col items-center">
+                <i class="fas fa-book-open text-2xl md:text-3xl text-primary-purple mb-4"></i>
+                <a href="#"><h3 class="text-lg md:text-2xl font-bold mb-3 uppercase tracking-tighter">História</h3></a>
+            </div>
+            {# fim historia #}
+
+            {# contato #}
+            <div class="bg-surface p-4 md:p-8 rounded-lg border border-silver/10 hover:border-silver transition-all group text-center flex flex-col items-center">
+                <i class="fas fa-envelope text-2xl md:text-3xl text-primary-purple mb-4"></i>
+                <a href="#"><h3 class="text-lg md:text-2xl font-bold mb-3 uppercase tracking-tighter">Contato</h3></a>
+            </div>
+            {# fim contato #}
+
+            {# galerias publicas #}
+            <div class="bg-surface p-4 md:p-8 rounded-lg border border-silver/10 hover:border-silver transition-all group text-center flex flex-col items-center">
+                <i class="fas fa-camera-retro text-2xl md:text-3xl text-primary-purple mb-4"></i>
+                <a href="#"><h3 class="text-lg md:text-2xl font-bold mb-3 uppercase tracking-tighter">Galerias públicas</h3></a>
+            </div>
+            {# fim galerias publicas #}
+
+            {# galerias exclusivas #}
+            <div class="bg-surface p-4 md:p-8 rounded-lg border border-silver/10 hover:border-silver transition-all group text-center flex flex-col items-center">
+                <i class="fas fa-user-lock text-2xl md:text-3xl text-primary-purple mb-4"></i>
+                <a href="#"><h3 class="text-lg md:text-2xl font-bold mb-3 uppercase tracking-tighter">Galerias Exclusivas</h3></a>
+            </div>
+            {# fim galerias exclusivas #}
+
+        </div>
+    </section>
+    {# fim conteudo #}
+
+    {# convite #}
+    <section class="bg-surface py-8 md:py-16 mt-6 md:mt-12 border-t border-silver/10 hover:border-silver transition-all group">
+        <div class="container mx-auto px-4 text-center flex flex-col items-center">
+            <h4 class="text-lg md:text-3xl font-bold mb-6 text-white max-w-2xl uppercase tracking-tighter">
+                Acesse seu painel para mensagens, materiais exclusivos e mais informações!
+            </h4>
+
+            {% if not user.is_authenticated %}
+                <div class="flex flex-row justify-center gap-4 w-full sm:w-auto">
+                    <a href="{% url 'users:login' %}" class="flex-1 sm:flex-none bg-white text-black px-4 py-2 md:px-8 md:py-3 rounded font-bold hover:bg-silver transition-all text-sm md:text-base uppercase tracking-widest">
+                        Login <i class="fas fa-sign-in-alt ml-1 md:ml-2 text-primary-blue"></i>
+                    </a>
+                    <a href="{% url 'users:register' %}" class="bg-primary-purple text-white px-4 py-2 md:px-8 md:py-3 rounded font-bold hover:bg-purple-hover transition-all text-sm md:text-base uppercase tracking-widest">
+                        Cadastrar <i class="fas fa-user-plus ml-1 md:ml-2"></i>
+                    </a>
+                </div>
+            {% else %}
+                <a href="{% url 'users:dashboard' %}" class="bg-white text-black px-8 py-3 rounded font-bold hover:bg-silver transition-all inline-block text-sm md:text-base uppercase tracking-widest">
+                    Ir para o Dashboard <i class="fas fa-user-circle ml-2 text-primary-purple"></i>
+                </a>
+            {% endif %}
+        </div>
+    </section>
+    {# fim convite #}
+
+</div>
+{% endblock content %}

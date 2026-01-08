@@ -1,0 +1,130 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - GUISBEGHEN{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+
+    <div class="flex flex-col md:flex-row justify-between items-end mb-10 border-b border-silver/10 pb-6 gap-4">
+        <div>
+            <h1 class="text-4xl font-bold text-primary-purple uppercase tracking-tighter">Dashboard</h1>
+            <p class="text-silver mt-1">Bem-vindo, <span class="text-white font-semibold">{{ user.username }}</span></p>
+        </div>
+        <div class="flex gap-3">
+            <span class="badge-group">Grupo: {{ user.grupos_audiencia.first.nome|default:"Nenhum" }}</span>
+            <a href="{% url 'users:logout' %}" class="text-xs uppercase tracking-widest text-error hover:underline">Sair</a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+        {# Perfil #}
+        <div class="card-surface p-6 rounded-lg bg-surface flex flex-col justify-between">
+            <div>
+                <div class="flex items-center gap-4 mb-4">
+                    {% if user.profile.foto %}
+                        <img src="{{ user.profile.foto.url }}" alt="Avatar" class="w-16 h-16 rounded-full object-cover border-2 border-primary-purple">
+                    {% else %}
+                        <div class="w-16 h-16 rounded-full bg-black border border-silver/20 flex items-center justify-center">
+                            <i class="fas fa-user text-silver text-2xl"></i>
+                        </div>
+                    {% endif %}
+                    <div>
+                        <h3 class="text-white font-bold uppercase text-sm">Meu Perfil</h3>
+                        <p class="text-silver text-xs">{{ user.email }}</p>
+                    </div>
+                </div>
+                <div class="text-silver text-sm italic">
+                    <p>{{ user.profile.cidade|default:"Cidade não informada" }} / {{ user.profile.estado|default:"UF" }}</p>
+                    <p class="text-white font-semibold not-italic mt-1">{{ user.first_name }} {{ user.last_name }}</p>
+                </div>
+            </div>
+            <a href="{% url 'users:profile' %}" class="mt-6 block text-center py-2 bg-white text-black font-bold text-xs uppercase tracking-widest hover:bg-silver transition-all">Ver Perfil Completo</a>
+        </div>
+
+        {# Galerias Públicas #}
+        <div class="card-surface p-6 rounded-lg bg-surface flex flex-col justify-between">
+            <div>
+                <div class="flex justify-between items-start mb-4">
+                    <i class="fas fa-images text-success text-2xl"></i>
+                    <span class="badge-public uppercase font-bold">Livre</span>
+                </div>
+                <h3 class="text-white font-bold uppercase text-sm mb-2">Galerias Públicas</h3>
+                <p class="text-silver text-xs mb-6 leading-relaxed">Explore o acervo de acesso aberto a todos os visitantes da plataforma.</p>
+            </div>
+            <a href="#" class="block text-center py-2 bg-success hover:bg-green-700 text-white font-bold text-xs uppercase tracking-widest transition-all">Explorar</a>
+        </div>
+
+        {# Galerias Exclusivas #}
+        {% if user.is_authenticated %}
+        <div class="card-surface p-6 rounded-lg bg-surface flex flex-col justify-between">
+            <div>
+                <div class="flex justify-between items-start mb-4">
+                    <i class="fas fa-user-lock text-primary-purple text-2xl"></i>
+                    <span class="text-[10px] bg-primary-purple px-2 py-0.5 rounded text-white uppercase font-bold">Privado</span>
+                </div>
+                <h3 class="text-white font-bold uppercase text-sm mb-2">Galerias Exclusivas</h3>
+                <p class="text-silver text-xs mb-6 leading-relaxed">Acesse o conteúdo restrito disponível.</p>
+            </div>
+            <a href="#" class="block text-center py-2 bg-primary-purple hover:bg-purple-hover text-white font-bold text-xs uppercase tracking-widest transition-all">Acessar Conteúdo</a>
+        </div>
+        {% endif %}
+
+        {# Chat #}
+        <div class="card-surface p-6 rounded-lg bg-surface flex flex-col justify-between">
+            <div>
+                <div class="flex justify-between items-start mb-4">
+                    <i class="fas fa-comments text-primary-blue text-2xl"></i>
+                    <span class="text-[10px] bg-primary-blue px-2 py-0.5 rounded text-white uppercase font-bold">Real-time</span>
+                </div>
+                <h3 class="text-white font-bold uppercase text-sm mb-2">Canais de Chat</h3>
+                <p class="text-silver text-xs mb-6 leading-relaxed">Acesse as salas de bate-papo exclusivas.</p>
+            </div>
+            <a href="#" class="block text-center py-2 bg-primary-blue hover:bg-blue-hover text-white font-bold text-xs uppercase tracking-widest transition-all">Acessar Chat</a>
+        </div>
+
+        {# Suporte Técnico #}
+        <div class="card-surface p-6 rounded-lg bg-surface flex flex-col justify-between">
+            <div>
+                <div class="flex justify-between items-start mb-4">
+                    <i class="fas fa-headset text-silver text-2xl"></i>
+                </div>
+                <h3 class="text-white font-bold uppercase text-sm mb-2">Suporte Técnico</h3>
+                <p class="text-silver text-xs mb-6 leading-relaxed">Abra chamados, tire dúvidas ou relate problemas técnicos com a equipe.</p>
+            </div>
+            <a href="#" class="block text-center py-2 bg-silver text-black font-bold text-xs uppercase tracking-widest hover:bg-white transition-all">Novo Chamado</a>
+        </div>
+
+        {# Painel de Gestão (Fotógrafo) #}
+        {% if user.profile.is_fotografo %}
+        <div class="card-surface p-6 rounded-lg bg-surface border-l-4 border-primary-purple flex flex-col justify-between">
+            <div>
+                <div class="flex justify-between items-start mb-4">
+                    <i class="fas fa-camera-retro text-primary-purple text-2xl"></i>
+                    <span class="text-[10px] bg-primary-purple px-2 py-0.5 rounded text-white uppercase font-bold">Staff</span>
+                </div>
+                <h3 class="text-white font-bold uppercase text-sm mb-2">Painel de Gestão</h3>
+                <p class="text-silver text-xs mb-6 leading-relaxed">Gestão para fotografos.</p>
+            </div>
+            <a href="#" class="block text-center py-2 bg-primary-purple hover:bg-purple-hover text-white text-xs uppercase tracking-widest transition-all font-bold">Gerenciar Repositório</a>
+        </div>
+        {% endif %}
+
+        {# Administração Sistema #}
+        {% if user.profile.is_admin_projeto or user.is_superuser %}
+        <div class="card-surface p-6 rounded-lg bg-surface border-l-4 border-error flex flex-col justify-between">
+            <div>
+                <div class="flex justify-between items-start mb-4">
+                    <i class="fas fa-user-shield text-error text-2xl"></i>
+                </div>
+                <h3 class="text-white font-bold uppercase text-sm mb-2">Administração Sistema</h3>
+                <p class="text-silver text-xs mb-6 leading-relaxed">Gestão de usuários, grupos de audiência e configurações globais.</p>
+            </div>
+            <a href="/admin/" target="_blank" class="block text-center py-2 bg-error hover:bg-red-700 text-white text-xs uppercase tracking-widest transition-all font-bold">Django Admin</a>
+        </div>
+        {% endif %}
+
+    </div>
+</div>
+{% endblock %}

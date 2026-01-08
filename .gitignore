@@ -1,0 +1,36 @@
+# Ambientes Virtuais
+venv/
+env/
+.venv/
+
+# IDEs (PyCharm e VS Code)
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Python - Cache e Logs
+__pycache__/
+*.py[cod]
+*$py.class
+*.log
+.pytest_cache/
+.mypy_cache/
+
+# Banco de Dados Local
+db.sqlite3
+*.db
+
+# Arquivos de Mídia e Estáticos Coletados
+media/
+staticfiles/
+
+# Variáveis de Ambiente e Segredos
+.env
+.secrets
+secrets.json
+
+# Sistema Operacional
+.DS_Store
+Thumbs.db
+.bin/

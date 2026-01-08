@@ -1,0 +1,73 @@
+{% load static %}
+<header class="bg-black border-b border-silver/10">
+    <nav class="container mx-auto px-8 py-1 flex justify-between items-center">
+        <div class="flex items-center">
+            <a href="{% url 'core:index' %}">
+                <img src="{% static 'images/logo_horiz7.png' %}" alt="Guisbeghen" style="height: 90px !important; width: auto;">
+            </a>
+        </div>
+
+        <div class="flex items-center space-x-4 md:space-x-6">
+
+            {% if user.is_authenticated %}
+                <span class="text-[10px] md:text-xs text-silver uppercase tracking-tighter">
+                    Olá, <span class="text-white font-bold">{{ user.username }}</span>
+                </span>
+            {% endif %}
+
+            <div class="hidden md:flex items-center space-x-6">
+                <a href="{% url 'core:index' %}" class="text-silver hover:text-primary-purple transition-colors uppercase text-xs tracking-widest font-semibold">Home</a>
+
+                {% if user.is_authenticated %}
+                    <a href="{% url 'users:dashboard' %}" class="text-silver hover:text-primary-purple transition-colors uppercase text-xs tracking-widest font-semibold">Dashboard</a>
+                    <a href="{% url 'users:logout' %}" class="text-[10px] bg-error/10 text-error border border-error/20 px-3 py-1 rounded hover:bg-error hover:text-white transition-all uppercase tracking-widest font-bold">
+                        Sair
+                    </a>
+                {% else %}
+                    <a href="{% url 'users:login' %}" class="bg-primary-blue text-white px-6 py-2 rounded text-xs uppercase tracking-widest font-bold hover:bg-blue-hover transition-all">
+                        Entrar
+                    </a>
+                {% endif %}
+            </div>
+
+            <div class="md:hidden flex items-center">
+                <button id="mobile-menu-button" class="text-silver focus:outline-none">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path id="hamburger-icon" class="block" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        <path id="close-icon" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <div id="mobile-menu" class="hidden md:hidden bg-surface border-t border-silver/10 px-8 py-6">
+        <div class="flex flex-col space-y-6">
+            <a href="{% url 'core:index' %}" class="text-success hover:text-white transition-colors uppercase text-xs tracking-widest font-bold">Home</a>
+
+            {% if user.is_authenticated %}
+                <a href="{% url 'users:dashboard' %}" class="text-success hover:text-white transition-colors uppercase text-xs tracking-widest font-bold">Dashboard</a>
+                <a href="{% url 'users:logout' %}" class="text-[10px] bg-error text-white px-4 py-2 rounded hover:bg-error/80 transition-all uppercase tracking-widest font-bold text-center">
+                    Sair
+                </a>
+            {% else %}
+                <a href="{% url 'users:login' %}" class="bg-primary-blue text-white px-6 py-3 rounded text-xs uppercase tracking-widest font-bold hover:bg-blue-hover transition-all text-center">
+                    Entrar
+                </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        const btn = document.getElementById('mobile-menu-button');
+        const menu = document.getElementById('mobile-menu');
+        const hamburgerIcon = document.getElementById('hamburger-icon');
+        const closeIcon = document.getElementById('close-icon');
+
+        btn.addEventListener('click', () => {
+            menu.classList.toggle('hidden');
+            hamburgerIcon.classList.toggle('hidden');
+            closeIcon.classList.toggle('hidden');
+        });
+    </script>
+</header>

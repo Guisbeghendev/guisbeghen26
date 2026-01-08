@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+@source "../../../templates/**/*.html";
+@source "../../../**/templates/**/*.html";
+
+@theme {
+  /* Cores Principais */
+  --color-black: #000000;
+  --color-white: #FFFFFF;
+
+  /* Superfícies e Backgrounds */
+  --color-surface: #121212;
+  --color-silver: #ADB5BD;
+
+  /* Identidade e Ações */
+  --color-primary-blue: #000080;
+  --color-primary-purple: #7851A9;
+
+  /* Status */
+  --color-error: #DE3163;
+  --color-success: #006742;
+
+  /* Interações (Hover) */
+  --color-blue-hover: #0000A6;
+  --color-purple-hover: #9474BD;
+
+  /* Overlays */
+  --color-overlay: rgba(0, 0, 0, 0.85);
+}
+
+/* Utilitários Customizados */
+@layer base {
+  body {
+    @apply bg-black text-white;
+  }
+
+  /* Configuração da Barra de Rolagem */
+  ::-webkit-scrollbar {
+    width: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #000000;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #ADB5BD;
+    border-radius: 5px;
+  }
+}
+
+@layer components {
+  /* Exemplo de Card seguindo sua regra */
+  .card-surface {
+    @apply bg-surface border border-transparent transition-colors duration-200;
+  }
+  .card-surface:hover {
+    @apply border-silver;
+  }
+
+  /* Badge seguindo sua regra */
+  .badge-public { @apply bg-success text-white px-2 py-1 rounded text-xs; }
+  .badge-exclusive { @apply bg-error text-white px-2 py-1 rounded text-xs; }
+  .badge-group { @apply bg-primary-purple text-white px-2 py-1 rounded text-xs; }
+}
