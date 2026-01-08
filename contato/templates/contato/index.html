@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+
+{% block title %}Contato - GUISBEGHEN{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-8 py-16">
+    <h1 class="text-4xl font-bold text-primary-purple uppercase tracking-tighter mb-8">Contato</h1>
+
+    <div class="card-surface p-12 rounded-lg bg-surface border border-silver/10 flex flex-col items-center justify-center text-center">
+        <i class="fas fa-envelope-open-text text-6xl text-silver/20 mb-6"></i>
+
+        <p class="text-white text-xl font-bold uppercase tracking-widest mb-4">
+            Fale diretamente comigo, aqui sobre fotos e registros.
+        </p>
+
+        <p class="text-silver italic leading-relaxed max-w-md mb-8">
+            Conteúdo em desenvolvimento. Em breve... Aguarde ou entre em contato através do e-mail oficial:
+        </p>
+
+        <a href="mailto:contato_fotografia@guisbeghen.com.br" class="text-primary-purple text-lg md:text-2xl font-bold border-b border-primary-purple/30 hover:border-primary-purple transition-all">
+            contato_fotografia@guisbeghen.com.br
+        </a>
+    </div>
+</div>
+{% endblock %}

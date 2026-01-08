@@ -20,6 +20,8 @@
 
                 <a href="{% url 'historia:index' %}" class="text-silver hover:text-primary-purple transition-colors uppercase text-xs tracking-widest font-semibold">História</a>
 
+                <a href="{% url 'contato:index' %}" class="text-silver hover:text-primary-purple transition-colors uppercase text-xs tracking-widest font-semibold">Contato</a>
+
                 {% if user.is_authenticated %}
                     <a href="{% url 'users:dashboard' %}" class="text-silver hover:text-primary-purple transition-colors uppercase text-xs tracking-widest font-semibold">Dashboard</a>
                     <a href="{% url 'users:logout' %}" class="text-[10px] bg-error/10 text-error border border-error/20 px-3 py-1 rounded hover:bg-error hover:text-white transition-all uppercase tracking-widest font-bold">
@@ -48,6 +50,8 @@
             <a href="{% url 'core:index' %}" class="text-success hover:text-white transition-colors uppercase text-xs tracking-widest font-bold">Home</a>
 
             <a href="{% url 'historia:index' %}" class="text-success hover:text-white transition-colors uppercase text-xs tracking-widest font-bold">História</a>
+
+            <a href="{% url 'contato:index' %}" class="text-success hover:text-white transition-colors uppercase text-xs tracking-widest font-bold">Contato</a>
 
             {% if user.is_authenticated %}
                 <a href="{% url 'users:dashboard' %}" class="text-success hover:text-white transition-colors uppercase text-xs tracking-widest font-bold">Dashboard</a>

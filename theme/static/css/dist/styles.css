@@ -558,6 +558,12 @@
   .border-primary-purple {
     border-color: var(--color-primary-purple);
   }
+  .border-primary-purple\/30 {
+    border-color: color-mix(in srgb, #7851A9 30%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      border-color: color-mix(in oklab, var(--color-primary-purple) 30%, transparent);
+    }
+  }
   .border-silver\/10 {
     border-color: color-mix(in srgb, #ADB5BD 10%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
@@ -1021,6 +1027,13 @@
   .file\:uppercase {
     &::file-selector-button {
       text-transform: uppercase;
+    }
+  }
+  .hover\:border-primary-purple {
+    &:hover {
+      @media (hover: hover) {
+        border-color: var(--color-primary-purple);
+      }
     }
   }
   .hover\:border-silver {
