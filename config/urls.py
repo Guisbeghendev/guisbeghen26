@@ -12,6 +12,7 @@ urlpatterns = [
     path('contato/', include('contato.urls')),
     path('perfil/', include('perfil.urls')),
     path('mensagens/', include('mensagens.urls')),
+    path('suporte/', include('suporte.urls', namespace='suporte')),
 ]
 
 # Servir arquivos de mídia e estáticos em desenvolvimento

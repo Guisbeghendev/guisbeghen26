@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'contato',
     'perfil',
     'mensagens',
+    'suporte',
 ]
 
 MIDDLEWARE = [

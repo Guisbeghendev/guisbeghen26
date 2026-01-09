@@ -1,0 +1,72 @@
+{% extends 'base.html' %}
+
+{% block title %}Suporte Técnico - GUISBEGHEN{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+
+    <div class="flex flex-col md:flex-row justify-between items-center mb-10 border-b border-silver/10 pb-6 gap-4">
+        <div>
+            <h1 class="text-4xl font-bold text-primary-purple uppercase tracking-tighter">Suporte Técnico</h1>
+            <p class="text-silver mt-1">Gerencie seus chamados e dúvidas técnicas.</p>
+        </div>
+        <a href="{% url 'suporte:novo_chamado' %}" class="bg-primary-blue hover:bg-blue-hover text-white px-6 py-3 font-bold text-xs uppercase tracking-widest transition-all">
+            <i class="fas fa-plus mr-2"></i> Novo Chamado
+        </a>
+    </div>
+
+    <div class="card-surface bg-surface rounded-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="border-b border-silver/10 bg-black/20">
+                        <th class="p-4 text-xs uppercase tracking-widest text-silver font-bold">Assunto</th>
+                        <th class="p-4 text-xs uppercase tracking-widest text-silver font-bold">Status</th>
+                        <th class="p-4 text-xs uppercase tracking-widest text-silver font-bold">Prioridade</th>
+                        <th class="p-4 text-xs uppercase tracking-widest text-silver font-bold">Atualizado em</th>
+                        <th class="p-4 text-xs uppercase tracking-widest text-silver font-bold text-right">Ação</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-silver/5">
+                    {% for chamado in chamados %}
+                    <tr class="hover:bg-white/5 transition-colors">
+                        <td class="p-4">
+                            <div class="text-white font-bold text-sm">{{ chamado.assunto }}</div>
+                            <div class="text-[10px] text-silver uppercase">ID: {{ chamado.uuid|stringformat:".8s" }}</div>
+                        </td>
+                        <td class="p-4">
+                            {% if chamado.status == 'aberto' %}
+                                <span class="text-[10px] bg-primary-blue px-2 py-1 rounded text-white uppercase font-bold">Aberto</span>
+                            {% elif chamado.status == 'atendimento' %}
+                                <span class="text-[10px] bg-primary-purple px-2 py-1 rounded text-white uppercase font-bold">Em Atendimento</span>
+                            {% elif chamado.status == 'aguardando' %}
+                                <span class="text-[10px] bg-error px-2 py-1 rounded text-white uppercase font-bold">Aguardando</span>
+                            {% else %}
+                                <span class="text-[10px] bg-success px-2 py-1 rounded text-white uppercase font-bold">Fechado</span>
+                            {% endif %}
+                        </td>
+                        <td class="p-4 text-xs text-silver uppercase font-semibold">
+                            {{ chamado.get_prioridade_display }}
+                        </td>
+                        <td class="p-4 text-xs text-silver">
+                            {{ chamado.atualizado_em|date:"d/m/Y H:i" }}
+                        </td>
+                        <td class="p-4 text-right">
+                            <a href="{% url 'suporte:detalhe_chamado' chamado.uuid %}" class="text-white hover:text-primary-purple transition-colors">
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="p-10 text-center text-silver italic text-sm">
+                            Nenhum chamado encontrado.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

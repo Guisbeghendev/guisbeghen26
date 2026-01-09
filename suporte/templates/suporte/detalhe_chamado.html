@@ -1,0 +1,120 @@
+{% extends 'base.html' %}
+
+{% block title %}Chamado #{{ chamado.uuid|stringformat:".8s" }} - GUISBEGHEN{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8 max-w-4xl">
+
+    {# Cabeçalho do Chamado #}
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 border-b border-silver/10 pb-6">
+        <div>
+            <div class="flex items-center gap-3 mb-2">
+                <a href="{% url 'suporte:lista_chamados' %}" class="text-silver hover:text-white transition-all"><i class="fas fa-arrow-left"></i></a>
+                <h1 class="text-2xl font-bold text-white uppercase">{{ chamado.assunto }}</h1>
+            </div>
+            <p class="text-xs text-silver uppercase tracking-widest">
+                Aberto por <span class="text-primary-purple">{{ chamado.usuario.username }}</span> em {{ chamado.criado_em|date:"d/m/Y H:i" }}
+            </p>
+        </div>
+
+        <div class="flex flex-col items-end gap-2">
+            <span id="status-badge" class="px-3 py-1 rounded text-[10px] font-bold uppercase text-white
+                {% if chamado.status == 'aberto' %}bg-primary-blue{% elif chamado.status == 'atendimento' %}bg-primary-purple{% elif chamado.status == 'aguardando' %}bg-error{% else %}bg-success{% endif %}">
+                {{ chamado.get_status_display }}
+            </span>
+
+            {% if is_admin %}
+            <select id="status-changer" class="bg-black border border-silver/20 text-[10px] text-white uppercase p-1 rounded focus:outline-none">
+                <option value="aberto" {% if chamado.status == 'aberto' %}selected{% endif %}>Aberto</option>
+                <option value="atendimento" {% if chamado.status == 'atendimento' %}selected{% endif %}>Em Atendimento</option>
+                <option value="aguardando" {% if chamado.status == 'aguardando' %}selected{% endif %}>Aguardando Usuário</option>
+                <option value="fechado" {% if chamado.status == 'fechado' %}selected{% endif %}>Fechar Chamado</option>
+            </select>
+            {% endif %}
+        </div>
+    </div>
+
+    {# Área de Mensagens #}
+    <div class="card-surface bg-surface rounded-lg border border-silver/10 flex flex-col h-[600px]">
+        <div id="chat-log" class="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-custom">
+            {% for msg in mensagens %}
+            <div class="flex {% if msg.remetente == request.user %}justify-end{% else %}justify-start{% endif %}">
+                <div class="max-w-[80%] rounded-lg p-4 {% if msg.remetente == request.user %}bg-primary-blue text-white{% else %}bg-black border border-silver/10 text-silver{% endif %}">
+                    <p class="text-xs font-bold mb-1 opacity-70 uppercase">{{ msg.remetente.username }}</p>
+                    <p class="text-sm leading-relaxed">{{ msg.conteudo }}</p>
+                    <p class="text-[9px] mt-2 opacity-50 text-right">{{ msg.criado_em|date:"H:i" }}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {# Input de Mensagem #}
+        <div class="p-4 border-t border-silver/10 bg-black/40">
+            <div class="flex gap-4">
+                <input id="chat-message-input" type="text" placeholder="Digite sua resposta..."
+                    class="flex-1 bg-black border border-silver/20 rounded px-4 py-3 text-white focus:outline-none focus:border-primary-purple transition-all">
+                <button id="chat-message-submit" class="bg-primary-purple hover:bg-purple-hover text-white px-6 py-3 font-bold text-xs uppercase tracking-widest transition-all">
+                    Enviar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{ chamado.uuid|json_script:"chamado-uuid" }}
+{{ request.user.username|json_script:"user-username" }}
+
+<script>
+    const uuid = JSON.parse(document.getElementById('chamado-uuid').textContent);
+    const userName = JSON.parse(document.getElementById('user-username').textContent);
+    const chatLog = document.querySelector('#chat-log');
+
+    // Auto-scroll para o fim
+    chatLog.scrollTop = chatLog.scrollHeight;
+
+    const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    const socket = new WebSocket(`${protocol}${window.location.host}/ws/suporte/${uuid}/`);
+
+    socket.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+
+        if (data.type === 'suporte_message') {
+            const isMe = data.user === userName;
+            const msgHtml = `
+                <div class="flex ${isMe ? 'justify-end' : 'justify-start'} animate-fade-in">
+                    <div class="max-w-[80%] rounded-lg p-4 ${isMe ? 'bg-primary-blue text-white' : 'bg-black border border-silver/10 text-silver'}">
+                        <p class="text-xs font-bold mb-1 opacity-70 uppercase">${data.user}</p>
+                        <p class="text-sm leading-relaxed">${data.mensagem}</p>
+                        <p class="text-[9px] mt-2 opacity-50 text-right">Agora</p>
+                    </div>
+                </div>`;
+            chatLog.insertAdjacentHTML('beforeend', msgHtml);
+            chatLog.scrollTop = chatLog.scrollHeight;
+        }
+
+        if (data.type === 'status_update') {
+            window.location.reload(); // Recarrega para atualizar visualmente o status e badges
+        }
+    };
+
+    document.querySelector('#chat-message-submit').onclick = function() {
+        const input = document.querySelector('#chat-message-input');
+        if (input.value.trim()) {
+            socket.send(JSON.stringify({
+                'type': 'chat_message',
+                'mensagem': input.value
+            }));
+            input.value = '';
+        }
+    };
+
+    {% if is_admin %}
+    document.querySelector('#status-changer').onchange = function() {
+        socket.send(JSON.stringify({
+            'type': 'change_status',
+            'status': this.value
+        }));
+    };
+    {% endif %}
+</script>
+{% endblock %}

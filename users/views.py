@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from .forms import CustomUserCreationForm, ProfileForm
 from mensagens.models import SalaChat, MensagemChat, VisualizacaoMensagem
+from suporte.models import TopicoSuporte, MensagemSuporte
 
 
 def register_view(request):
@@ -45,17 +46,15 @@ def logout_view(request):
 def dashboard_view(request):
     user = request.user
     tem_mensagens_novas = False
+    tem_suporte_novo = False
 
-    # Busca salas vinculadas aos grupos do usuário
+    # --- Lógica do Chat Mensagens ---
     salas = SalaChat.objects.filter(grupo__in=user.grupos_audiencia.all())
-
     for sala in salas:
         visu, created = VisualizacaoMensagem.objects.get_or_create(
             usuario=user,
             sala=sala
         )
-
-        # Verifica se há mensagens posteriores à última visualização (exceto as do próprio usuário)
         if MensagemChat.objects.filter(
                 sala=sala,
                 timestamp__gt=visu.ultima_visualizacao
@@ -63,8 +62,23 @@ def dashboard_view(request):
             tem_mensagens_novas = True
             break
 
+    # --- Lógica do Suporte ---
+    if user.is_staff or user.profile.is_admin_projeto:
+        tem_suporte_novo = MensagemSuporte.objects.filter(
+            topico__status__in=['aberto', 'atendimento', 'aguardando'],
+            lida=False
+        ).exclude(remetente__is_staff=True).exists()
+    else:
+        tem_suporte_novo = MensagemSuporte.objects.filter(
+            topico__usuario=user,
+            topico__status__in=['aberto', 'atendimento', 'aguardando'],
+            lida=False,
+            remetente__is_staff=True
+        ).exists()
+
     return render(request, 'users/dashboard.html', {
-        'tem_mensagens_novas': tem_mensagens_novas
+        'tem_mensagens_novas': tem_mensagens_novas,
+        'tem_suporte_novo': tem_suporte_novo
     })
 
 

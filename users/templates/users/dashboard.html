@@ -103,15 +103,30 @@
         </div>
 
         {# Suporte Técnico #}
-        <div class="card-surface p-6 rounded-lg bg-surface flex flex-col justify-between">
+        <div class="card-surface p-6 rounded-lg bg-surface flex flex-col justify-between relative overflow-hidden group">
+
+            {% if tem_suporte_novo %}
+            <div class="absolute top-0 right-0 w-32 h-32 pointer-events-none">
+                <div class="absolute transform rotate-45 bg-primary-purple text-white text-[10px] font-bold py-1 px-10 right-[-35px] top-[20px] shadow-lg uppercase tracking-widest text-center">
+                    Chamado
+                </div>
+            </div>
+            {% endif %}
+
             <div>
                 <div class="flex justify-between items-start mb-4">
-                    <i class="fas fa-headset text-silver text-2xl"></i>
+                    <i class="fas fa-headset text-silver text-2xl {% if tem_suporte_novo %}animate-pulse text-primary-purple{% endif %}"></i>
                 </div>
                 <h3 class="text-white font-bold uppercase text-sm mb-2">Suporte Técnico</h3>
                 <p class="text-silver text-xs mb-6 leading-relaxed">Abra chamados, tire dúvidas ou relate problemas técnicos com a equipe.</p>
             </div>
-            <a href="#" class="block text-center py-2 bg-silver text-black font-bold text-xs uppercase tracking-widest hover:bg-white transition-all">Novo Chamado</a>
+            <a href="{% url 'suporte:lista_chamados' %}" class="block text-center py-2 {% if tem_suporte_novo %}bg-primary-purple animate-pulse{% else %}bg-silver text-black{% endif %} font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
+                {% if tem_suporte_novo %}
+                    Ver Novas Respostas
+                {% else %}
+                    Novo Chamado
+                {% endif %}
+            </a>
         </div>
 
         {# Painel de Gestão (Fotógrafo) #}

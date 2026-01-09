@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Novo Chamado - GUISBEGHEN{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="max-w-2xl mx-auto">
+
+        <div class="mb-8">
+            <a href="{% url 'suporte:lista_chamados' %}" class="text-silver hover:text-white text-xs uppercase tracking-widest transition-all">
+                <i class="fas fa-arrow-left mr-2"></i> Voltar para Lista
+            </a>
+            <h1 class="text-3xl font-bold text-primary-purple uppercase tracking-tighter mt-4">Abrir Novo Chamado</h1>
+            <p class="text-silver mt-1">Descreva seu problema ou dúvida técnica detalhadamente.</p>
+        </div>
+
+        <div class="card-surface bg-surface p-8 rounded-lg border border-silver/10 shadow-xl">
+            <form method="POST" action="{% url 'suporte:novo_chamado' %}" class="space-y-6">
+                {% csrf_token %}
+
+                {# Assunto #}
+                <div>
+                    <label for="assunto" class="block text-xs font-bold text-silver uppercase tracking-widest mb-2">Assunto do Chamado</label>
+                    <input type="text" name="assunto" id="assunto" required
+                        class="w-full bg-black border border-silver/20 rounded px-4 py-3 text-white focus:outline-none focus:border-primary-blue transition-all"
+                        placeholder="Ex: Problema no upload de fotos">
+                </div>
+
+                {# Prioridade #}
+                <div>
+                    <label for="prioridade" class="block text-xs font-bold text-silver uppercase tracking-widest mb-2">Prioridade</label>
+                    <select name="prioridade" id="prioridade"
+                        class="w-full bg-black border border-silver/20 rounded px-4 py-3 text-white focus:outline-none focus:border-primary-blue transition-all appearance-none cursor-pointer">
+                        <option value="baixa">Baixa (Dúvida ou sugestão)</option>
+                        <option value="media" selected>Média (Problema funcional)</option>
+                        <option value="alta">Alta (Erro crítico / Sistema parado)</option>
+                    </select>
+                </div>
+
+                {# Mensagem Inicial #}
+                <div>
+                    <label for="mensagem" class="block text-xs font-bold text-silver uppercase tracking-widest mb-2">Descrição Detalhada</label>
+                    <textarea name="mensagem" id="mensagem" rows="6" required
+                        class="w-full bg-black border border-silver/20 rounded px-4 py-3 text-white focus:outline-none focus:border-primary-blue transition-all resize-none"
+                        placeholder="Descreva o que está acontecendo..."></textarea>
+                </div>
+
+                {# Botão de Envio #}
+                <div class="pt-4">
+                    <button type="submit"
+                        class="w-full bg-primary-blue hover:bg-blue-hover text-white font-bold py-4 text-xs uppercase tracking-widest transition-all shadow-lg">
+                        Abrir Chamado Agora
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div class="mt-6 text-center">
+            <p class="text-[10px] text-silver uppercase tracking-tighter">O tempo de resposta médio da nossa equipe é de 24 horas úteis.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}
