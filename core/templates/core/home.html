@@ -18,6 +18,14 @@
     <section class="container mx-auto px-4 py-8">
         <div class="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
 
+            {# GESTÃO (CONDICIONAL) #}
+            {% if user.is_authenticated and user.profile.is_fotografo or user.profile.is_admin_projeto or user.is_superuser %}
+            <a href="{% url 'repositorio:painel_gestao' %}" class="bg-surface p-4 md:p-8 rounded-lg border border-primary-purple/30 hover:border-primary-purple transition-all group text-center flex flex-col items-center justify-center">
+                <i class="fas fa-cog text-2xl md:text-3xl text-primary-purple mb-4"></i>
+                <h3 class="text-lg md:text-2xl font-bold uppercase tracking-tighter">Gestão</h3>
+            </a>
+            {% endif %}
+
             {# galerias publicas #}
             <a href="#" class="bg-surface p-4 md:p-8 rounded-lg border border-silver/10 hover:border-silver transition-all group text-center flex flex-col items-center justify-center">
                 <i class="fas fa-camera-retro text-2xl md:text-3xl text-primary-purple mb-4"></i>

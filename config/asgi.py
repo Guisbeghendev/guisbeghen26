@@ -12,14 +12,16 @@ django.setup()
 from channels.routing import ProtocolTypeRouter, URLRouter
 from channels.auth import AuthMiddlewareStack
 import mensagens.routing
-import suporte.routing  # Importação do novo roteamento
+import suporte.routing
+import repositorio.routing  # Importação do roteamento do repositório
 
 application = ProtocolTypeRouter({
     "http": get_asgi_application(),
     "websocket": AuthMiddlewareStack(
         URLRouter(
             mensagens.routing.websocket_urlpatterns +  # Rotas do Chat
-            suporte.routing.websocket_urlpatterns      # Rotas do Suporte
+            suporte.routing.websocket_urlpatterns +    # Rotas do Suporte
+            repositorio.routing.websocket_urlpatterns  # Rotas do Repositório
         )
     ),
 })

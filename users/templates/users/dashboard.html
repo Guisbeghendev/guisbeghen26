@@ -130,7 +130,7 @@
         </div>
 
         {# Painel de Gestão (Fotógrafo) #}
-        {% if user.profile.is_fotografo %}
+        {% if user.profile.is_fotografo or user.profile.is_admin_projeto or user.is_superuser %}
         <div class="card-surface p-6 rounded-lg bg-surface border-l-4 border-primary-purple flex flex-col justify-between">
             <div>
                 <div class="flex justify-between items-start mb-4">
@@ -140,7 +140,7 @@
                 <h3 class="text-white font-bold uppercase text-sm mb-2">Painel de Gestão</h3>
                 <p class="text-silver text-xs mb-6 leading-relaxed">Gestão para fotografos.</p>
             </div>
-            <a href="#" class="block text-center py-2 bg-primary-purple hover:bg-purple-hover text-white text-xs uppercase tracking-widest transition-all font-bold">Gerenciar Repositório</a>
+            <a href="{% url 'repositorio:painel_gestao' %}" class="block text-center py-2 bg-primary-purple hover:bg-purple-hover text-white text-xs uppercase tracking-widest transition-all font-bold">Gerenciar Repositório</a>
         </div>
         {% endif %}
 

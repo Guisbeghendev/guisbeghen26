@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+
+{% block title %}Gestão de Galerias - GUISBEGHEN{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8 border-b border-silver/10 pb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-primary-purple uppercase tracking-tighter">Painel de Gestão</h1>
+            <p class="text-silver">Gerencie seu acervo fotográfico</p>
+        </div>
+        <div class="flex gap-4">
+            <a href="{% url 'repositorio:lista_marcas' %}" class="px-4 py-2 border border-silver text-silver hover:text-white hover:border-white transition-all text-xs uppercase font-bold tracking-widest">Marcas D'água</a>
+            <a href="{% url 'repositorio:criar_galeria' %}" class="px-4 py-2 bg-primary-purple hover:bg-purple-hover text-white transition-all text-xs uppercase font-bold tracking-widest">Nova Galeria</a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for galeria in galerias %}
+        <div class="card-surface bg-surface rounded-lg overflow-hidden flex flex-col border border-silver/5">
+            <div class="h-48 bg-black relative">
+                {% if galeria.capa %}
+                    <img src="{{ galeria.capa.thumbnail.url }}" class="w-full h-full object-cover opacity-60">
+                {% else %}
+                    <div class="w-full h-full flex items-center justify-center text-silver/20">
+                        <i class="fas fa-image text-5xl"></i>
+                    </div>
+                {% endif %}
+                <span class="absolute top-2 right-2 text-[10px] px-2 py-1 uppercase font-bold
+                    {% if galeria.status == 'publicada' %}bg-success text-white{% elif galeria.status == 'rascunho' %}bg-silver text-black{% else %}bg-error text-white{% endif %}">
+                    {{ galeria.get_status_display }}
+                </span>
+            </div>
+            <div class="p-5 flex-1">
+                <h3 class="text-white font-bold uppercase text-sm mb-1">{{ galeria.titulo }}</h3>
+                <p class="text-silver text-[10px] uppercase mb-4">{{ galeria.categoria.nome }} | {{ galeria.data_evento|date:"d/m/Y" }}</p>
+
+                <div class="flex flex-wrap gap-2 mt-4 border-t border-silver/5 pt-4">
+                    {% if galeria.status != 'publicada' %}
+                        <a href="{% url 'repositorio:alterar_status_galeria' galeria.slug 'publicada' %}" class="text-[9px] font-bold uppercase text-success hover:underline">Publicar</a>
+                    {% endif %}
+                    {% if galeria.status != 'arquivada' %}
+                        <a href="{% url 'repositorio:alterar_status_galeria' galeria.slug 'arquivada' %}" class="text-[9px] font-bold uppercase text-silver hover:underline">Arquivar</a>
+                    {% endif %}
+                    {% if galeria.status != 'rascunho' %}
+                        <a href="{% url 'repositorio:alterar_status_galeria' galeria.slug 'rascunho' %}" class="text-[9px] font-bold uppercase text-silver hover:underline">Rascunho</a>
+                    {% endif %}
+                    <a href="{% url 'repositorio:excluir_galeria' galeria.slug %}" onclick="return confirm('Tem certeza que deseja excluir permanentemente esta galeria?')" class="text-[9px] font-bold uppercase text-error hover:underline ml-auto">Excluir</a>
+                </div>
+            </div>
+            <div class="grid grid-cols-2 border-t border-silver/10">
+                <a href="{% url 'repositorio:upload_midia' galeria.slug %}" class="py-3 text-center text-[10px] font-bold uppercase tracking-widest hover:bg-silver/5 border-r border-silver/10 text-white">Mídias</a>
+                <a href="{% url 'repositorio:editar_galeria' galeria.slug %}" class="py-3 text-center text-[10px] font-bold uppercase tracking-widest hover:bg-silver/5 text-silver">Editar</a>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full py-20 text-center border-2 border-dashed border-silver/10">
+            <p class="text-silver uppercase tracking-widest text-sm">Nenhuma galeria encontrada.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

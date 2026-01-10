@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %}Upload: {{ galeria.titulo }} - GUISBEGHEN{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-end mb-8 border-b border-silver/10 pb-6">
+        <div>
+            <p class="text-primary-purple text-xs uppercase font-bold tracking-widest mb-1">Upload de Mídias</p>
+            <h1 class="text-3xl font-bold text-white uppercase tracking-tighter">{{ galeria.titulo }}</h1>
+        </div>
+        <a href="{% url 'repositorio:painel_gestao' %}" class="text-silver hover:text-white text-xs uppercase font-bold tracking-widest transition-all">
+            <i class="fas fa-chevron-left mr-2"></i>Voltar ao Painel
+        </a>
+    </div>
+
+    <div id="globalProgressContainer" class="hidden mb-10 card-surface bg-surface p-6 rounded-lg border border-primary-purple/30">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-white font-bold uppercase text-xs tracking-widest">Processamento no Servidor</h3>
+            <span id="globalPercText" class="text-primary-purple font-bold text-sm">0%</span>
+        </div>
+        <div class="w-full bg-black h-2 rounded-full overflow-hidden">
+            <div id="globalProgressBar" class="bg-primary-purple h-full w-0 transition-all duration-500"></div>
+        </div>
+        <p id="globalStatusText" class="text-silver text-[10px] uppercase mt-3 tracking-widest text-center">Iniciando processamento das imagens...</p>
+    </div>
+
+    <div id="dropzone" class="border-2 border-dashed border-silver/20 bg-surface rounded-lg p-12 text-center transition-all hover:border-primary-purple group cursor-pointer mb-10">
+        <input type="file" id="fileInput" multiple class="hidden" accept="image/*">
+        <i class="fas fa-cloud-upload-alt text-4xl text-silver group-hover:text-primary-purple mb-4"></i>
+        <h3 class="text-white font-bold uppercase text-sm mb-2">Arraste as fotos aqui</h3>
+        <p class="text-silver text-xs">ou clique para selecionar os arquivos (Suporta upload em massa)</p>
+    </div>
+
+    <div id="uploadQueue" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10"></div>
+
+    <div class="border-t border-silver/10 pt-10">
+        <h2 class="text-white font-bold uppercase text-xs tracking-widest mb-6">Mídias no Repositório (<span id="mediaCount">{{ midias.count }}</span>)</h2>
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" id="mediaGrid">
+            {% for midia in midias %}
+            <div class="relative group aspect-square bg-black border border-silver/10 overflow-hidden" id="midia-{{ midia.id }}">
+                {% if midia.thumbnail %}
+                    <img src="{{ midia.thumbnail.url }}" class="w-full h-full object-cover {% if midia.status_processamento != 'disponivel' %}opacity-30{% endif %}">
+                {% else %}
+                    <div class="w-full h-full flex items-center justify-center text-silver/20"><i class="fas fa-sync fa-spin"></i></div>
+                {% endif %}
+
+                <div class="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center gap-2">
+                    {% if midia.status_processamento == 'disponivel' %}
+                        <a href="{% url 'repositorio:definir_capa' midia.pk %}" class="text-[10px] text-white uppercase font-bold hover:text-success"><i class="fas fa-star mr-1"></i> Capa</a>
+                    {% endif %}
+                    <button onclick="excluirMidia({{ midia.id }})" class="text-[10px] text-error uppercase font-bold"><i class="fas fa-trash"></i> Excluir</button>
+                </div>
+
+                {% if galeria.capa == midia %}
+                    <div class="absolute top-0 left-0 bg-success text-white text-[8px] font-bold px-2 py-1 uppercase">Capa</div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<script>
+const dropzone = document.getElementById('dropzone');
+const fileInput = document.getElementById('fileInput');
+const uploadQueue = document.getElementById('uploadQueue');
+const mediaGrid = document.getElementById('mediaGrid');
+const globalProgressContainer = document.getElementById('globalProgressContainer');
+const globalProgressBar = document.getElementById('globalProgressBar');
+const globalPercText = document.getElementById('globalPercText');
+const globalStatusText = document.getElementById('globalStatusText');
+
+const csrfToken = "{{ csrf_token }}";
+const galeriaSlug = "{{ galeria.slug }}";
+
+// WebSocket para progresso em tempo real
+const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+const wsUrl = `${protocol}${window.location.host}/ws/galeria/${galeriaSlug}/`;
+const statusSocket = new WebSocket(wsUrl);
+
+statusSocket.onmessage = function(e) {
+    const data = JSON.parse(e.data);
+
+    if (data.progresso !== undefined) {
+        globalProgressContainer.classList.remove('hidden');
+        globalProgressBar.style.width = data.progresso + '%';
+        globalPercText.innerText = data.progresso + '%';
+        globalStatusText.innerText = `Processando: ${data.concluidas} de ${data.total} imagens`;
+
+        if (data.status === 'concluido') {
+            globalStatusText.innerText = "Processamento concluído com sucesso!";
+            globalProgressContainer.classList.add('border-success/50');
+            setTimeout(() => {
+                globalProgressContainer.classList.add('hidden');
+                location.reload();
+            }, 3000);
+        }
+    }
+};
+
+dropzone.onclick = () => fileInput.click();
+dropzone.ondragover = (e) => { e.preventDefault(); dropzone.classList.add('border-primary-purple'); };
+dropzone.ondragleave = () => dropzone.classList.remove('border-primary-purple');
+dropzone.ondrop = (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('border-primary-purple');
+    handleFiles(e.dataTransfer.files);
+};
+
+fileInput.onchange = () => handleFiles(fileInput.files);
+
+function handleFiles(files) {
+    const totalFiles = files.length;
+    [...files].forEach((file, index) => {
+        const uniqueId = 'f' + Math.random().toString(36).substr(2, 9);
+        const item = document.createElement('div');
+        item.id = `queue-${uniqueId}`;
+        item.className = "card-surface bg-surface p-3 rounded flex flex-col gap-2 border border-silver/10";
+        item.innerHTML = `
+            <div class="flex justify-between items-center">
+                <span class="text-silver text-[10px] truncate w-32">${file.name}</span>
+                <span class="text-white text-[10px] font-bold" id="perc-${uniqueId}">0%</span>
+            </div>
+            <div class="w-full bg-black h-1 rounded overflow-hidden">
+                <div id="bar-${uniqueId}" class="bg-primary-purple h-full w-0 transition-all duration-300"></div>
+            </div>
+        `;
+        uploadQueue.appendChild(item);
+        uploadFile(file, uniqueId, index + 1, totalFiles);
+    });
+}
+
+function uploadFile(file, uniqueId, currentIndex, totalFiles) {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('csrfmiddlewaretoken', csrfToken);
+    formData.append('total_files', totalFiles);
+    formData.append('current_index', currentIndex);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', "{% url 'repositorio:upload_midia' galeria.slug %}", true);
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+
+    xhr.upload.onprogress = (e) => {
+        if (e.lengthComputable) {
+            const perc = Math.round((e.loaded / e.total) * 100);
+            const bar = document.getElementById(`bar-${uniqueId}`);
+            const percText = document.getElementById(`perc-${uniqueId}`);
+            if (bar) bar.style.width = perc + '%';
+            if (percText) percText.innerText = perc + '%';
+        }
+    };
+
+    xhr.onload = () => {
+        const queueItem = document.getElementById(`queue-${uniqueId}`);
+        if (xhr.status === 200) {
+            if (queueItem) {
+                queueItem.classList.add('border-success/50');
+                setTimeout(() => queueItem.remove(), 1000);
+            }
+        } else {
+            if (queueItem) {
+                queueItem.classList.add('border-error/50');
+                document.getElementById(`perc-${uniqueId}`).innerText = 'Erro';
+            }
+        }
+    };
+    xhr.send(formData);
+}
+
+function excluirMidia(id) {
+    if(!confirm('Deseja excluir permanentemente esta mídia do repositório?')) return;
+    fetch(`/repositorio/midia/${id}/excluir/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' }
+    }).then(res => res.json()).then(data => {
+        if(data.status === 'deleted') document.getElementById(`midia-${id}`).remove();
+    });
+}
+</script>
+{% endblock %}

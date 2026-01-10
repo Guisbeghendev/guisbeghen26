@@ -13,9 +13,12 @@ urlpatterns = [
     path('perfil/', include('perfil.urls')),
     path('mensagens/', include('mensagens.urls')),
     path('suporte/', include('suporte.urls', namespace='suporte')),
+    path('repositorio/', include('repositorio.urls')),
 ]
 
-# Servir arquivos de mídia e estáticos em desenvolvimento
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+    # Suporte ao armazenamento híbrido (Local para ativos, S3 para Repositório)
+    if settings.STORAGES['default']['BACKEND'] == 'django.core.files.storage.FileSystemStorage':
+        urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

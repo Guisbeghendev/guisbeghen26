@@ -25,8 +25,12 @@
                 <a href="{% url 'contato:index' %}" class="text-silver hover:text-primary-purple transition-colors uppercase text-xs tracking-widest font-semibold">Contato</a>
 
                 {% if user.is_authenticated %}
+                    {# Link Repositório/Gestão Condicional #}
+                    {% if user.profile.is_fotografo or user.profile.is_admin_projeto or user.is_superuser %}
+                        <a href="{% url 'repositorio:painel_gestao' %}" class="text-primary-purple hover:text-white transition-colors uppercase text-xs tracking-widest font-bold">Gestão</a>
+                    {% endif %}
+
                     <a href="{% url 'mensagens:lista_salas' %}" class="text-silver hover:text-primary-purple transition-colors uppercase text-xs tracking-widest font-semibold">Mensagens</a>
-                    {# Link Suporte Adicionado #}
                     <a href="{% url 'suporte:lista_chamados' %}" class="text-silver hover:text-primary-purple transition-colors uppercase text-xs tracking-widest font-semibold">Suporte</a>
                     <a href="{% url 'users:dashboard' %}" class="text-silver hover:text-primary-purple transition-colors uppercase text-xs tracking-widest font-semibold">Dashboard</a>
                     <a href="{% url 'users:logout' %}" class="text-[10px] bg-error/10 text-error border border-error/20 px-3 py-1 rounded hover:bg-error hover:text-white transition-all uppercase tracking-widest font-bold">
@@ -61,8 +65,11 @@
             <a href="{% url 'contato:index' %}" class="text-success hover:text-white transition-colors uppercase text-xs tracking-widest font-bold">Contato</a>
 
             {% if user.is_authenticated %}
+                {% if user.profile.is_fotografo or user.profile.is_admin_projeto or user.is_superuser %}
+                    <a href="{% url 'repositorio:painel_gestao' %}" class="text-primary-purple hover:text-white transition-colors uppercase text-xs tracking-widest font-bold">Gestão</a>
+                {% endif %}
+
                 <a href="{% url 'mensagens:lista_salas' %}" class="text-success hover:text-white transition-colors uppercase text-xs tracking-widest font-bold">Mensagens</a>
-                {# Link Suporte Adicionado Mobile #}
                 <a href="{% url 'suporte:lista_chamados' %}" class="text-success hover:text-white transition-colors uppercase text-xs tracking-widest font-bold">Suporte</a>
                 <a href="{% url 'users:dashboard' %}" class="text-success hover:text-white transition-colors uppercase text-xs tracking-widest font-bold">Dashboard</a>
                 <a href="{% url 'users:logout' %}" class="text-[10px] bg-error text-white px-4 py-2 rounded hover:bg-error/80 transition-all uppercase tracking-widest font-bold text-center">

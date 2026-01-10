@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Marcas D'água - GUISBEGHEN{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8 border-b border-silver/10 pb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-primary-purple uppercase tracking-tighter">Minhas Marcas D'água</h1>
+            <p class="text-silver text-sm">Biblioteca de identidades para sobreposição em fotos</p>
+        </div>
+        <div class="flex gap-4">
+            <a href="{% url 'repositorio:painel_gestao' %}" class="px-4 py-2 border border-silver text-silver hover:text-white hover:border-white transition-all text-xs uppercase font-bold tracking-widest">Voltar ao Painel</a>
+            <a href="{% url 'repositorio:nova_marca' %}" class="px-4 py-2 bg-primary-purple hover:bg-purple-hover text-white transition-all text-xs uppercase font-bold tracking-widest">Adicionar Marca</a>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {% for marca in marcas %}
+        <div class="card-surface bg-surface rounded-lg overflow-hidden border border-silver/5 flex flex-col">
+            <div class="h-40 bg-black flex items-center justify-center p-4">
+                {# As marcas d'água são servidas pelo S3 conforme configurado no Model #}
+                <img src="{{ marca.imagem.url }}" class="max-w-full max-h-full object-contain">
+            </div>
+            <div class="p-4 border-t border-silver/10 flex justify-between items-center">
+                <span class="text-white text-xs uppercase font-bold truncate">{{ marca.nome }}</span>
+                <span class="text-silver text-[9px]">{{ marca.criado_em|date:"d/m/Y" }}</span>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-span-full py-20 text-center border-2 border-dashed border-silver/10">
+            <p class="text-silver uppercase tracking-widest text-sm">Nenhuma marca d'água cadastrada.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
