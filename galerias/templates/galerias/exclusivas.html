@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Conteúdo Exclusivo | Guisbeghen{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <nav class="mb-6">
+        <a href="{% url 'galerias:index' %}?trilha=exclusiva" class="text-silver hover:text-white text-sm uppercase tracking-widest transition-colors">
+            <i class="fas fa-chevron-left mr-2"></i> Voltar para Categorias
+        </a>
+    </nav>
+
+    <header class="mb-12">
+        <h1 class="text-4xl font-bold text-white uppercase tracking-tighter">Conteúdo Exclusivo</h1>
+        <div class="h-1 w-20 bg-primary-purple mt-2"></div>
+    </header>
+
+    {% if galerias %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {% for galeria in galerias %}
+            {% include 'galerias/includes/card_galeria.html' with trilha='exclusiva' %}
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-20 bg-surface rounded-lg border border-silver/10">
+        <p class="text-silver uppercase tracking-widest">Nenhuma galeria exclusiva disponível neste grupo.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

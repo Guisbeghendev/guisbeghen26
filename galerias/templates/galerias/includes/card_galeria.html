@@ -1,0 +1,31 @@
+<a href="{% url 'galerias:detalhe_galeria' galeria.slug %}?trilha={{ trilha }}" class="group block bg-surface border border-silver/10 rounded overflow-hidden hover:border-primary-purple transition-all duration-300">
+    <div class="relative aspect-video overflow-hidden">
+        {# CORREÇÃO: Usando url_capa que foi assinada na View para o S3 #}
+        {% if galeria.url_capa %}
+            <img src="{{ galeria.url_capa }}" alt="{{ galeria.titulo }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+        {% elif galeria.foto_capa %}
+            {# Fallback caso a url_capa não exista mas o campo foto_capa sim #}
+            <img src="{{ galeria.foto_capa.url }}" alt="{{ galeria.titulo }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+        {% else %}
+            <div class="w-full h-full bg-black flex items-center justify-center">
+                <i class="fas fa-image text-silver/20 text-3xl"></i>
+            </div>
+        {% endif %}
+
+        <div class="absolute top-2 right-2">
+            <span class="bg-primary-purple text-white text-[10px] px-2 py-1 rounded uppercase font-bold">
+                {% if trilha == 'publica' %}Público{% else %}Exclusivo{% endif %}
+            </span>
+        </div>
+    </div>
+
+    <div class="p-4">
+        <h3 class="text-white font-medium text-sm truncate uppercase mb-1 tracking-tighter">{{ galeria.titulo }}</h3>
+        <div class="flex justify-between items-center">
+            <p class="text-silver text-[10px] uppercase tracking-widest">
+                <i class="fas fa-calendar-alt mr-1"></i> {{ galeria.data_evento|date:"d/m/Y" }}
+            </p>
+            <i class="fas fa-arrow-right text-[10px] text-primary-purple group-hover:translate-x-1 transition-transform"></i>
+        </div>
+    </div>
+</a>

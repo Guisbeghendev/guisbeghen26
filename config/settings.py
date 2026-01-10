@@ -48,6 +48,7 @@ INSTALLED_APPS = [
     'suporte',
     'repositorio',
     'storages',
+    'galerias',
 ]
 
 MIDDLEWARE = [
@@ -74,6 +75,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'galerias.context_processors.categorias_globais',
             ],
         },
     },

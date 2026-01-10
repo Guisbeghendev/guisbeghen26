@@ -14,6 +14,7 @@ urlpatterns = [
     path('mensagens/', include('mensagens.urls')),
     path('suporte/', include('suporte.urls', namespace='suporte')),
     path('repositorio/', include('repositorio.urls')),
+    path('galerias/', include('galerias.urls')),
 ]
 
 if settings.DEBUG:

@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Categorias | Guisbeghen{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <header class="mb-12">
+        <h1 class="text-4xl font-bold text-white uppercase tracking-tighter">Categorias</h1>
+        <div class="h-1 w-20 bg-primary-purple mt-2"></div>
+    </header>
+
+    {% if categorias %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        {% for categoria in categorias %}
+        <a href="{% url 'galerias:grupos_por_categoria' categoria.slug %}?trilha={{ trilha }}" class="group">
+            <div class="bg-surface rounded-lg overflow-hidden border border-silver/10 hover:border-primary-purple transition-all duration-300 hover:scale-[1.02]">
+
+                <div class="relative h-64 overflow-hidden">
+                    {% if categoria.imagem_base %}
+                        <img src="{{ categoria.imagem_base.url }}" alt="{{ categoria.nome }}" class="w-full h-full object-cover grayscale group-hover:grayscale-0 transition-all duration-500">
+                    {% else %}
+                        {# Fallback para quando a categoria não tem imagem cadastrada #}
+                        <div class="w-full h-full bg-surface-dark flex flex-col items-center justify-center border-b border-silver/10">
+                            <i class="fas fa-folder-open text-4xl text-silver/20 mb-2"></i>
+                            <span class="text-[10px] text-silver/30 uppercase tracking-[0.2em]">Sem capa definida</span>
+                        </div>
+                    {% endif %}
+
+                    <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent opacity-80"></div>
+
+                    <div class="absolute bottom-4 left-4">
+                        <h2 class="text-2xl font-bold text-white uppercase tracking-tighter">{{ categoria.nome }}</h2>
+                    </div>
+                </div>
+
+                <div class="p-4 flex justify-between items-center bg-surface">
+                    <span class="text-silver text-xs uppercase tracking-widest">Explorar conteúdo</span>
+                    <i class="fas fa-arrow-right text-primary-purple group-hover:translate-x-2 transition-transform"></i>
+                </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-20 bg-surface rounded-lg border border-silver/10">
+        <p class="text-silver uppercase tracking-widest">Nenhuma categoria disponível.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

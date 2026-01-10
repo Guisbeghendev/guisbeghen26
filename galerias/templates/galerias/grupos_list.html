@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ categoria.nome }} | Grupos | Guisbeghen{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <nav class="mb-6">
+        <a href="{% url 'galerias:index' %}?trilha={{ trilha }}" class="text-silver hover:text-white text-sm uppercase tracking-widest transition-colors">
+            <i class="fas fa-chevron-left mr-2"></i> Voltar para Categorias
+        </a>
+    </nav>
+
+    <header class="mb-12">
+        <h1 class="text-4xl font-bold text-white uppercase tracking-tighter">{{ categoria.nome }}</h1>
+        <div class="h-1 w-20 bg-primary-purple mt-2"></div>
+        <p class="text-silver text-xs mt-4 uppercase tracking-[0.3em]">Selecione um grupo para visualizar as galerias</p>
+    </header>
+
+    {% if grupos %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for grupo in grupos %}
+            <a href="{% if trilha == 'exclusiva' %}{% url 'galerias:galerias_exclusivas' categoria.slug grupo.id %}{% else %}{% url 'galerias:galerias_publicas' categoria.slug grupo.id %}{% endif %}?trilha={{ trilha }}" class="group">
+                <div class="bg-surface p-8 rounded-lg border border-silver/10 hover:border-primary-purple transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h2 class="text-2xl font-bold text-white uppercase tracking-tighter">{{ grupo.nome }}</h2>
+                            <span class="text-primary-purple text-[10px] uppercase tracking-widest font-bold">Explorar Grupo</span>
+                        </div>
+                        <i class="fas {% if trilha == 'exclusiva' %}fa-lock{% else %}fa-door-open{% endif %} text-primary-purple/40 group-hover:text-primary-purple text-2xl transition-colors"></i>
+                    </div>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="text-center py-20 bg-surface rounded-lg border border-silver/10">
+            <p class="text-silver uppercase tracking-widest">Nenhum grupo disponível nesta categoria para a trilha {{ trilha }}.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
