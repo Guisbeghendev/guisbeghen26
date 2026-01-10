@@ -13,7 +13,6 @@ def categorias_list(request):
     if trilha == 'exclusiva' and request.user.is_authenticated:
         categorias = Categoria.objects.filter(
             galerias__status='publicada',
-            galerias__acesso_publico=False,
             galerias__grupos_audiencia__in=request.user.grupos_audiencia.all()
         ).distinct()
     else:
@@ -37,14 +36,14 @@ def grupos_por_categoria(request, slug):
         grupos = GrupoAudiencia.objects.filter(
             galeria__categoria=categoria,
             galeria__status='publicada',
-            galeria__acesso_publico=False,
             id__in=request.user.grupos_audiencia.values_list('id', flat=True)
         ).distinct()
     else:
         grupos = GrupoAudiencia.objects.filter(
             galeria__categoria=categoria,
             galeria__status='publicada',
-            galeria__acesso_publico=True
+            galeria__acesso_publico=True,
+            id__in=request.user.grupos_audiencia.values_list('id', flat=True)
         ).distinct()
 
     return render(request, 'galerias/grupos_list.html', {
@@ -75,11 +74,10 @@ def galerias_publicas(request, categoria_slug=None, grupo_id=None):
 @login_required
 def galerias_exclusivas(request, categoria_slug=None, grupo_id=None):
     if request.user.is_superuser or request.user.profile.is_fotografo or request.user.profile.is_admin_projeto:
-        galerias = Galeria.objects.filter(status='publicada', acesso_publico=False)
+        galerias = Galeria.objects.filter(status='publicada')
     else:
         galerias = Galeria.objects.filter(
             status='publicada',
-            acesso_publico=False,
             grupos_audiencia__in=request.user.grupos_audiencia.all()
         )
 
