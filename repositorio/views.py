@@ -3,9 +3,11 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Count
 from .models import Galeria, Midia, MarcaDagua, Categoria
 from .forms import GaleriaForm, MarcaDaguaForm
 from .tasks import processar_imagem_task
+from galerias.utils import gerar_url_assinada_s3
 
 
 def is_fotografo(user):
@@ -48,7 +50,6 @@ def upload_midia_view(request, slug):
 
     if request.method == 'POST' and request.FILES.get('file'):
         arquivo = request.FILES.get('file')
-        # Captura metadados do lote enviados pelo frontend (Dropzone/XHR)
         total = int(request.POST.get('total_files', 1))
         indice = int(request.POST.get('current_index', 1))
         opacidade = int(request.POST.get('opacidade', 50))
@@ -59,7 +60,6 @@ def upload_midia_view(request, slug):
             status_processamento='pendente'
         )
 
-        # Disparo manual para controle de progresso (substitui o signal)
         marca_id = galeria.marca_dagua_padrao.id if galeria.marca_dagua_padrao else None
         processar_imagem_task.delay(
             midia_id=midia.id,
@@ -161,3 +161,22 @@ def alterar_status_galeria_view(request, slug, novo_status):
         galeria.save()
         messages.success(request, f"Galeria {galeria.get_status_display()} com sucesso.")
     return redirect('repositorio:painel_gestao')
+
+
+@login_required
+@user_passes_test(is_fotografo)
+def ranking_curtidas_view(request):
+    midias_query = Midia.objects.filter(status_processamento='disponivel')
+
+    if not request.user.is_superuser:
+        midias_query = midias_query.filter(galeria__fotografo=request.user)
+
+    midias = midias_query.annotate(total_likes=Count('curtidas_recebidas')) \
+        .filter(total_likes__gt=0) \
+        .order_by('-total_likes')
+
+    for midia in midias:
+        if midia.thumbnail:
+            midia.url_thumb = gerar_url_assinada_s3(midia.thumbnail.name)
+
+    return render(request, 'repositorio/curtidas_ranking.html', {'midias': midias})

@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}Ranking de Curtidas - GUISBEGHEN{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-8 border-b border-silver/10 pb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-primary-purple uppercase tracking-tighter">Ranking de Engajamento</h1>
+            <p class="text-silver">Fotos mais curtidas pelos seus clientes</p>
+        </div>
+        <div class="flex gap-4">
+            <a href="{% url 'repositorio:painel_gestao' %}" class="px-4 py-2 border border-silver text-silver hover:text-white hover:border-white transition-all text-xs uppercase font-bold tracking-widest">Voltar ao Painel</a>
+        </div>
+    </div>
+
+    {% if midias %}
+    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
+        {% for midia in midias %}
+        <div class="card-surface bg-surface rounded-lg overflow-hidden flex flex-col border border-silver/5">
+            <div class="aspect-square relative">
+                <img src="{{ midia.url_thumb }}" class="w-full h-full object-cover">
+                <div class="absolute top-2 left-2 bg-primary-purple text-white text-[10px] font-bold px-2 py-1 rounded shadow-lg">
+                    #{{ forloop.counter }}
+                </div>
+            </div>
+            <div class="p-4">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-white font-bold text-xl">
+                        <i class="fas fa-heart text-primary-purple mr-1"></i> {{ midia.total_likes }}
+                    </span>
+                    <span class="text-silver/50 text-[10px]">ID #{{ midia.id }}</span>
+                </div>
+                <p class="text-silver text-[10px] uppercase truncate" title="{{ midia.galeria.titulo }}">
+                    <i class="fas fa-folder mr-1"></i> {{ midia.galeria.titulo }}
+                </p>
+            </div>
+            <div class="border-t border-silver/10">
+                <a href="{% url 'repositorio:upload_midia' midia.galeria.slug %}" class="block py-3 text-center text-[10px] font-bold uppercase tracking-widest hover:bg-silver/5 text-white">
+                    Ver na Galeria
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="py-20 text-center border-2 border-dashed border-silver/10">
+        <p class="text-silver uppercase tracking-widest text-sm">Nenhuma curtida registrada em suas fotos ainda.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

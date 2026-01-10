@@ -10,6 +10,9 @@
             <p class="text-silver">Gerencie seu acervo fotográfico</p>
         </div>
         <div class="flex gap-4">
+            <a href="{% url 'repositorio:ranking_curtidas' %}" class="px-4 py-2 border border-success text-success hover:bg-success hover:text-white transition-all text-xs uppercase font-bold tracking-widest">
+                <i class="fas fa-trophy mr-2"></i> Ranking de Curtidas
+            </a>
             <a href="{% url 'repositorio:lista_marcas' %}" class="px-4 py-2 border border-silver text-silver hover:text-white hover:border-white transition-all text-xs uppercase font-bold tracking-widest">Marcas D'água</a>
             <a href="{% url 'repositorio:criar_galeria' %}" class="px-4 py-2 bg-primary-purple hover:bg-purple-hover text-white transition-all text-xs uppercase font-bold tracking-widest">Nova Galeria</a>
         </div>

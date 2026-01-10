@@ -21,4 +21,7 @@ urlpatterns = [
     # Marcas D'água
     path('marcas/', views.lista_marcas_view, name='lista_marcas'),
     path('marcas/nova/', views.nova_marca_view, name='nova_marca'),
+
+    # Ranking de Curtidas
+    path('ranking/', views.ranking_curtidas_view, name='ranking_curtidas'),
 ]
