@@ -32,7 +32,7 @@
     <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="gallery-grid">
         {% for midia in midias %}
         <div class="relative group bg-surface rounded overflow-hidden border border-silver/10 hover:border-primary-purple transition-all">
-            <a href="{{ midia.url_exibicao }}" target="_blank" class="block aspect-square overflow-hidden">
+            <a href="{{ midia.url_exibicao }}" data-lightbox="galeria-{{ galeria.id }}" data-title="Foto #{{ midia.id }}" class="block aspect-square overflow-hidden">
                 <img src="{{ midia.url_thumb }}" alt="Foto da galeria" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110">
             </a>
 
