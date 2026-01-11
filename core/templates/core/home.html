@@ -90,6 +90,38 @@
     </section>
     {% endif %}
 
+    {# NOVO CONTAINER: CARROSSEL DE CATEGORIAS PÚBLICAS #}
+    {% if categorias_carrossel %}
+    <section class="container mx-auto px-4 py-8 overflow-hidden">
+        <h2 class="text-xs font-bold text-silver uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+            <span class="w-8 h-[1px] bg-primary-purple"></span> Explorar por Categoria
+        </h2>
+
+        <div class="grid grid-flow-col auto-cols-[85%] md:auto-cols-[35%] lg:auto-cols-[25%] gap-4 pb-6 overflow-x-auto snap-x snap-mandatory scrollbar-hide">
+            {% for cat in categorias_carrossel %}
+            <a href="{% url 'galerias:grupos_por_categoria' cat.slug %}?trilha=publica" class="snap-center relative group block aspect-[16/10] overflow-hidden rounded-lg bg-surface border border-silver/10 transition-all">
+                {% if cat.url_imagem %}
+                    <img src="{{ cat.url_imagem }}" alt="{{ cat.nome }}" class="w-full h-full object-cover opacity-50 group-hover:opacity-100 transition-all duration-700 group-hover:scale-110">
+                {% endif %}
+
+                <div class="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent flex items-end p-4 md:p-6">
+                    <h3 class="text-white font-bold uppercase tracking-widest text-xs md:text-sm border-b-2 border-primary-purple pb-1">
+                        {{ cat.nome }}
+                    </h3>
+                </div>
+            </a>
+            {% endfor %}
+        </div>
+    </section>
+
+    <style>
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+    {% endif %}
+
+
+
     {# CONTAINER 3: CONVITE / CALL TO ACTION #}
     <section class="bg-surface py-8 md:py-16 mt-6 md:mt-12 border-t border-silver/10 hover:border-silver transition-all group">
         <div class="container mx-auto px-4 text-center flex flex-col items-center">
