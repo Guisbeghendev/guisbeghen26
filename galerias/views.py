@@ -10,11 +10,24 @@ from .utils import gerar_url_assinada_s3, usuario_tem_acesso_galeria
 def categorias_list(request):
     trilha = request.GET.get('trilha', 'publica')
 
-    if trilha == 'exclusiva' and request.user.is_authenticated:
-        categorias = Categoria.objects.filter(
-            galerias__status='publicada',
-            galerias__grupos_audiencia__in=request.user.grupos_audiencia.all()
-        ).distinct()
+    if trilha == 'exclusiva':
+        if request.user.is_authenticated:
+            user_profile = getattr(request.user, 'profile', None)
+            is_staff = request.user.is_superuser or \
+                       (user_profile and user_profile.is_fotografo) or \
+                       (user_profile and user_profile.is_admin_projeto)
+
+            if is_staff:
+                categorias = Categoria.objects.filter(
+                    galerias__status='publicada'
+                ).distinct()
+            else:
+                categorias = Categoria.objects.filter(
+                    galerias__status='publicada',
+                    galerias__grupos_audiencia__in=request.user.grupos_audiencia.all()
+                ).distinct()
+        else:
+            categorias = Categoria.objects.none()
     else:
         categorias = Categoria.objects.filter(
             galerias__status='publicada',
@@ -33,17 +46,27 @@ def grupos_por_categoria(request, slug):
     from users.models import GrupoAudiencia
 
     if trilha == 'exclusiva' and request.user.is_authenticated:
-        grupos = GrupoAudiencia.objects.filter(
-            galeria__categoria=categoria,
-            galeria__status='publicada',
-            id__in=request.user.grupos_audiencia.values_list('id', flat=True)
-        ).distinct()
+        user_profile = getattr(request.user, 'profile', None)
+        is_staff = request.user.is_superuser or \
+                   (user_profile and user_profile.is_fotografo) or \
+                   (user_profile and user_profile.is_admin_projeto)
+
+        if is_staff:
+            grupos = GrupoAudiencia.objects.filter(
+                galeria__categoria=categoria,
+                galeria__status='publicada'
+            ).distinct()
+        else:
+            grupos = GrupoAudiencia.objects.filter(
+                galeria__categoria=categoria,
+                galeria__status='publicada',
+                id__in=request.user.grupos_audiencia.values_list('id', flat=True)
+            ).distinct()
     else:
         grupos = GrupoAudiencia.objects.filter(
             galeria__categoria=categoria,
             galeria__status='publicada',
-            galeria__acesso_publico=True,
-            id__in=request.user.grupos_audiencia.values_list('id', flat=True)
+            galeria__acesso_publico=True
         ).distinct()
 
     return render(request, 'galerias/grupos_list.html', {
@@ -54,44 +77,63 @@ def grupos_por_categoria(request, slug):
 
 
 def galerias_publicas(request, categoria_slug=None, grupo_id=None):
-    galerias = Galeria.objects.filter(status='publicada', acesso_publico=True)
+    galerias_qs = Galeria.objects.filter(status='publicada', acesso_publico=True)
 
     if categoria_slug:
-        galerias = galerias.filter(categoria__slug=categoria_slug)
+        galerias_qs = galerias_qs.filter(categoria__slug=categoria_slug)
     if grupo_id:
-        galerias = galerias.filter(grupos_audiencia__id=grupo_id)
+        galerias_qs = galerias_qs.filter(grupos_audiencia__id=grupo_id)
+
+    # Resolve o QuerySet antes de iterar para garantir unicidade e carregar a capa
+    galerias = galerias_qs.select_related('capa').distinct()
 
     for galeria in galerias:
         if galeria.capa and galeria.capa.arquivo_processado:
             galeria.url_capa = gerar_url_assinada_s3(galeria.capa.arquivo_processado.name)
+        elif galeria.capa and galeria.capa.thumbnail:
+            galeria.url_capa = gerar_url_assinada_s3(galeria.capa.thumbnail.name)
+        else:
+            galeria.url_capa = None
 
     return render(request, 'galerias/publicas.html', {
-        'galerias': galerias.distinct(),
+        'galerias': galerias,
         'trilha': 'publica'
     })
 
 
 @login_required
 def galerias_exclusivas(request, categoria_slug=None, grupo_id=None):
-    if request.user.is_superuser or request.user.profile.is_fotografo or request.user.profile.is_admin_projeto:
-        galerias = Galeria.objects.filter(status='publicada')
+    user_profile = getattr(request.user, 'profile', None)
+    is_staff = request.user.is_superuser or \
+               (user_profile and user_profile.is_fotografo) or \
+               (user_profile and user_profile.is_admin_projeto)
+
+    if is_staff:
+        galerias_qs = Galeria.objects.filter(status='publicada')
     else:
-        galerias = Galeria.objects.filter(
+        galerias_qs = Galeria.objects.filter(
             status='publicada',
             grupos_audiencia__in=request.user.grupos_audiencia.all()
         )
 
     if categoria_slug:
-        galerias = galerias.filter(categoria__slug=categoria_slug)
+        galerias_qs = galerias_qs.filter(categoria__slug=categoria_slug)
     if grupo_id:
-        galerias = galerias.filter(grupos_audiencia__id=grupo_id)
+        galerias_qs = galerias_qs.filter(grupos_audiencia__id=grupo_id)
+
+    # Resolve o QuerySet antes de iterar para garantir unicidade e carregar a capa
+    galerias = galerias_qs.select_related('capa').distinct()
 
     for galeria in galerias:
         if galeria.capa and galeria.capa.arquivo_processado:
             galeria.url_capa = gerar_url_assinada_s3(galeria.capa.arquivo_processado.name)
+        elif galeria.capa and galeria.capa.thumbnail:
+            galeria.url_capa = gerar_url_assinada_s3(galeria.capa.thumbnail.name)
+        else:
+            galeria.url_capa = None
 
     return render(request, 'galerias/exclusivas.html', {
-        'galerias': galerias.distinct(),
+        'galerias': galerias,
         'trilha': 'exclusiva'
     })
 
@@ -137,7 +179,7 @@ def toggle_curtida(request, midia_id):
         else:
             status = 'adicionado'
 
-        total_foto = midia.curtidas_recebidas.count()
+        total_foto = midia.curtidas_rece_count() if hasattr(midia, 'curtidas_recebidas') else 0
         return JsonResponse({'status': status, 'total_foto': total_foto})
 
     return JsonResponse({'error': 'Invalid request'}, status=400)

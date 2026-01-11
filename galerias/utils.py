@@ -35,17 +35,20 @@ def usuario_tem_acesso_galeria(user, galeria):
     """
     Verifica se o usuário tem permissão para visualizar a galeria.
     """
-    # 1. Acesso Público
+    # 1. Acesso Público: Sempre permitido
     if galeria.acesso_publico:
         return True
 
-    # 2. Usuário não logado não acessa conteúdo restrito
+    # 2. Usuário não logado não acessa conteúdo exclusivo
     if not user.is_authenticated:
         return False
 
-    # 3. Staff, Fotógrafos e Admins do Projeto têm acesso total
-    if user.is_superuser or user.profile.is_fotografo or user.profile.is_admin_projeto:
+    # 3. Staff, Fotógrafos e Admins do Projeto têm acesso total (com proteção contra ausência de Profile)
+    user_profile = getattr(user, 'profile', None)
+    if user.is_superuser or \
+       (user_profile and user_profile.is_fotografo) or \
+       (user_profile and user_profile.is_admin_projeto):
         return True
 
-    # 4. Verifica interseção entre grupos do usuário e da galeria
-    return galeria.grupos_audiencia.filter(id__in=user.grupos_audiencia.all()).exists()
+    # 4. Verifica se o usuário pertence a pelo menos um dos grupos da galeria
+    return galeria.grupos_audiencia.filter(id__in=user.grupos_audiencia.values_list('id', flat=True)).exists()
