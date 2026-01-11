@@ -1869,6 +1869,13 @@
       }
     }
   }
+  .hover\:text-error {
+    &:hover {
+      @media (hover: hover) {
+        color: var(--color-error);
+      }
+    }
+  }
   .hover\:text-primary-blue {
     &:hover {
       @media (hover: hover) {

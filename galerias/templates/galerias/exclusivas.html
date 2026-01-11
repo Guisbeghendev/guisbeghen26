@@ -5,10 +5,41 @@
 
 {% block content %}
 <div class="container mx-auto px-4 py-8">
-    <nav class="mb-6">
+    <nav class="mb-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <a href="{% url 'galerias:index' %}?trilha=exclusiva" class="text-silver hover:text-white text-sm uppercase tracking-widest transition-colors">
             <i class="fas fa-chevron-left mr-2"></i> Voltar para Categorias
         </a>
+
+        {# FILTRO POR DATA #}
+        <form method="GET" class="flex items-center gap-2">
+            <select name="mes" class="bg-surface border border-silver/20 rounded text-xs text-white p-2 outline-none focus:border-primary-purple">
+                <option value="">Mês (Todos)</option>
+                <option value="1" {% if mes_atual == '1' %}selected{% endif %}>Janeiro</option>
+                <option value="2" {% if mes_atual == '2' %}selected{% endif %}>Fevereiro</option>
+                <option value="3" {% if mes_atual == '3' %}selected{% endif %}>Março</option>
+                <option value="4" {% if mes_atual == '4' %}selected{% endif %}>Abril</option>
+                <option value="5" {% if mes_atual == '5' %}selected{% endif %}>Maio</option>
+                <option value="6" {% if mes_atual == '6' %}selected{% endif %}>Junho</option>
+                <option value="7" {% if mes_atual == '7' %}selected{% endif %}>Julho</option>
+                <option value="8" {% if mes_atual == '8' %}selected{% endif %}>Agosto</option>
+                <option value="9" {% if mes_atual == '9' %}selected{% endif %}>Setembro</option>
+                <option value="10" {% if mes_atual == '10' %}selected{% endif %}>Outubro</option>
+                <option value="11" {% if mes_atual == '11' %}selected{% endif %}>Novembro</option>
+                <option value="12" {% if mes_atual == '12' %}selected{% endif %}>Dezembro</option>
+            </select>
+
+            <select name="ano" class="bg-surface border border-silver/20 rounded text-xs text-white p-2 outline-none focus:border-primary-purple">
+                <option value="">Ano (Todos)</option>
+                {% for ano in anos_disponiveis %}
+                    <option value="{{ ano }}" {% if ano_atual == ano|slugify %}selected{% endif %}>{{ ano }}</option>
+                {% endfor %}
+            </select>
+
+            <button type="submit" class="bg-primary-purple text-white px-4 py-2 rounded text-xs uppercase font-bold hover:bg-purple-hover transition-all">Filtrar</button>
+            {% if mes_atual or ano_atual %}
+                <a href="{{ request.path }}" class="text-silver hover:text-error text-xs uppercase font-bold"><i class="fas fa-times"></i></a>
+            {% endif %}
+        </form>
     </nav>
 
     <header class="mb-12">
@@ -24,7 +55,7 @@
     </div>
     {% else %}
     <div class="text-center py-20 bg-surface rounded-lg border border-silver/10">
-        <p class="text-silver uppercase tracking-widest">Nenhuma galeria exclusiva disponível neste grupo.</p>
+        <p class="text-silver uppercase tracking-widest">Nenhuma galeria exclusiva encontrada para os filtros aplicados.</p>
     </div>
     {% endif %}
 </div>

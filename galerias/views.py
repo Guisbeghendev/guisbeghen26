@@ -77,14 +77,26 @@ def grupos_por_categoria(request, slug):
 
 
 def galerias_publicas(request, categoria_slug=None, grupo_id=None):
-    galerias_qs = Galeria.objects.filter(status='publicada', acesso_publico=True)
+    # Adicionado order_by para cronologia decrescente
+    galerias_qs = Galeria.objects.filter(status='publicada', acesso_publico=True).order_by('-data_evento')
 
     if categoria_slug:
         galerias_qs = galerias_qs.filter(categoria__slug=categoria_slug)
     if grupo_id:
         galerias_qs = galerias_qs.filter(grupos_audiencia__id=grupo_id)
 
-    # Resolve o QuerySet antes de iterar para garantir unicidade e carregar a capa
+    # --- FILTRO POR DATA ---
+    anos_disponive_qs = galerias_qs.dates('data_evento', 'year', order='DESC')
+    anos_disponiveis = [dt.year for dt in anos_disponive_qs]
+
+    mes = request.GET.get('mes')
+    ano = request.GET.get('ano')
+    if mes:
+        galerias_qs = galerias_qs.filter(data_evento__month=mes)
+    if ano:
+        galerias_qs = galerias_qs.filter(data_evento__year=ano)
+
+    # Resolve o QuerySet garantindo unicidade e ordenação
     galerias = galerias_qs.select_related('capa').distinct()
 
     for galeria in galerias:
@@ -97,7 +109,10 @@ def galerias_publicas(request, categoria_slug=None, grupo_id=None):
 
     return render(request, 'galerias/publicas.html', {
         'galerias': galerias,
-        'trilha': 'publica'
+        'trilha': 'publica',
+        'mes_atual': mes,
+        'ano_atual': ano,
+        'anos_disponiveis': anos_disponiveis
     })
 
 
@@ -108,20 +123,32 @@ def galerias_exclusivas(request, categoria_slug=None, grupo_id=None):
                (user_profile and user_profile.is_fotografo) or \
                (user_profile and user_profile.is_admin_projeto)
 
+    # Adicionado order_by para cronologia decrescente
     if is_staff:
-        galerias_qs = Galeria.objects.filter(status='publicada')
+        galerias_qs = Galeria.objects.filter(status='publicada').order_by('-data_evento')
     else:
         galerias_qs = Galeria.objects.filter(
             status='publicada',
             grupos_audiencia__in=request.user.grupos_audiencia.all()
-        )
+        ).order_by('-data_evento')
 
     if categoria_slug:
         galerias_qs = galerias_qs.filter(categoria__slug=categoria_slug)
     if grupo_id:
         galerias_qs = galerias_qs.filter(grupos_audiencia__id=grupo_id)
 
-    # Resolve o QuerySet antes de iterar para garantir unicidade e carregar a capa
+    # --- FILTRO POR DATA ---
+    anos_disponive_qs = galerias_qs.dates('data_evento', 'year', order='DESC')
+    anos_disponiveis = [dt.year for dt in anos_disponive_qs]
+
+    mes = request.GET.get('mes')
+    ano = request.GET.get('ano')
+    if mes:
+        galerias_qs = galerias_qs.filter(data_evento__month=mes)
+    if ano:
+        galerias_qs = galerias_qs.filter(data_evento__year=ano)
+
+    # Resolve o QuerySet
     galerias = galerias_qs.select_related('capa').distinct()
 
     for galeria in galerias:
@@ -134,7 +161,10 @@ def galerias_exclusivas(request, categoria_slug=None, grupo_id=None):
 
     return render(request, 'galerias/exclusivas.html', {
         'galerias': galerias,
-        'trilha': 'exclusiva'
+        'trilha': 'exclusiva',
+        'mes_atual': mes,
+        'ano_atual': ano,
+        'anos_disponiveis': anos_disponiveis
     })
 
 
@@ -196,15 +226,16 @@ def busca_galerias(request):
         (user_profile and (user_profile.is_fotografo or user_profile.is_admin_projeto))
     )
 
+    # Adicionado order_by para cronologia decrescente na busca
     if is_staff:
-        galerias_qs = Galeria.objects.filter(status='publicada')
+        galerias_qs = Galeria.objects.filter(status='publicada').order_by('-data_evento')
     elif request.user.is_authenticated:
         galerias_qs = Galeria.objects.filter(
             Q(status='publicada') &
             (Q(acesso_publico=True) | Q(grupos_audiencia__in=request.user.grupos_audiencia.all()))
-        )
+        ).order_by('-data_evento')
     else:
-        galerias_qs = Galeria.objects.filter(status='publicada', acesso_publico=True)
+        galerias_qs = Galeria.objects.filter(status='publicada', acesso_publico=True).order_by('-data_evento')
 
     galerias = galerias_qs.filter(titulo__icontains=query).select_related('capa').distinct()
 
