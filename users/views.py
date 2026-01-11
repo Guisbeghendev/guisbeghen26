@@ -6,6 +6,7 @@ from django.contrib import messages
 from .forms import CustomUserCreationForm, ProfileForm
 from mensagens.models import SalaChat, MensagemChat, VisualizacaoMensagem
 from suporte.models import TopicoSuporte, MensagemSuporte
+from repositorio.models import Galeria
 
 
 def register_view(request):
@@ -76,9 +77,13 @@ def dashboard_view(request):
             remetente__is_staff=True
         ).exists()
 
+    # --- Últimas Galerias Publicadas ---
+    ultimas_galerias = Galeria.objects.filter(status='publicada').order_by('-atualizado_em')[:3]
+
     return render(request, 'users/dashboard.html', {
         'tem_mensagens_novas': tem_mensagens_novas,
-        'tem_suporte_novo': tem_suporte_novo
+        'tem_suporte_novo': tem_suporte_novo,
+        'ultimas_galerias': ultimas_galerias
     })
 
 

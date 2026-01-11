@@ -17,8 +17,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
         {# Perfil #}
         <div class="card-surface p-6 rounded-lg bg-surface flex flex-col justify-between">
             <div>
@@ -43,92 +42,6 @@
             <a href="{% url 'users:profile' %}" class="mt-6 block text-center py-2 bg-white text-black font-bold text-xs uppercase tracking-widest hover:bg-silver transition-all">Ver Perfil Completo</a>
         </div>
 
-        {# Galerias Públicas #}
-        <div class="card-surface p-6 rounded-lg bg-surface flex flex-col justify-between">
-            <div>
-                <div class="flex justify-between items-start mb-4">
-                    <i class="fas fa-images text-success text-2xl"></i>
-                    <span class="badge-public uppercase font-bold">Livre</span>
-                </div>
-                <h3 class="text-white font-bold uppercase text-sm mb-2">Galerias Públicas</h3>
-                <p class="text-silver text-xs mb-6 leading-relaxed">Explore o acervo de acesso aberto a todos os visitantes da plataforma.</p>
-            </div>
-            <a href="{% url 'galerias:index' %}?trilha=publica" class="block text-center py-2 bg-success hover:bg-green-700 text-white font-bold text-xs uppercase tracking-widest transition-all">Explorar</a>
-        </div>
-
-        {# Galerias Exclusivas #}
-        {% if user.is_authenticated %}
-        <div class="card-surface p-6 rounded-lg bg-surface flex flex-col justify-between">
-            <div>
-                <div class="flex justify-between items-start mb-4">
-                    <i class="fas fa-user-lock text-primary-purple text-2xl"></i>
-                    <span class="text-[10px] bg-primary-purple px-2 py-0.5 rounded text-white uppercase font-bold">Privado</span>
-                </div>
-                <h3 class="text-white font-bold uppercase text-sm mb-2">Galerias Exclusivas</h3>
-                <p class="text-silver text-xs mb-6 leading-relaxed">Acesse o conteúdo restrito disponível.</p>
-            </div>
-            <a href="{% url 'galerias:index' %}?trilha=exclusiva" class="block text-center py-2 bg-primary-purple hover:bg-purple-hover text-white font-bold text-xs uppercase tracking-widest transition-all">Acessar Conteúdo</a>
-        </div>
-        {% endif %}
-
-        {# Chat #}
-        <div class="card-surface p-6 rounded-lg bg-surface flex flex-col justify-between relative overflow-hidden group">
-
-            {% if tem_mensagens_novas %}
-            <div class="absolute top-0 right-0 w-32 h-32 pointer-events-none">
-                <div class="absolute transform rotate-45 bg-error text-white text-[10px] font-bold py-1 px-10 right-[-35px] top-[20px] shadow-lg uppercase tracking-widest text-center">
-                    Mensagem
-                </div>
-            </div>
-            {% endif %}
-
-            <div>
-                <div class="flex justify-between items-start mb-4">
-                    <div class="relative">
-                        <i class="fas fa-comments text-primary-blue text-2xl {% if tem_mensagens_novas %}animate-bounce text-error{% endif %}"></i>
-                    </div>
-                    <span class="text-[10px] bg-primary-blue px-2 py-0.5 rounded text-white uppercase font-bold">Real-time</span>
-                </div>
-                <h3 class="text-white font-bold uppercase text-sm mb-2">Canais de Chat</h3>
-                <p class="text-silver text-xs mb-6 leading-relaxed">Acesse as salas de bate-papo exclusivas.</p>
-            </div>
-
-            <a href="{% url 'mensagens:lista_salas' %}" class="block text-center py-2 {% if tem_mensagens_novas %}bg-error animate-pulse{% else %}bg-primary-blue{% endif %} hover:opacity-90 text-white font-bold text-xs uppercase tracking-widest transition-all">
-                {% if tem_mensagens_novas %}
-                    Ler Novas Mensagens
-                {% else %}
-                    Acessar Chat
-                {% endif %}
-            </a>
-        </div>
-
-        {# Suporte Técnico #}
-        <div class="card-surface p-6 rounded-lg bg-surface flex flex-col justify-between relative overflow-hidden group">
-
-            {% if tem_suporte_novo %}
-            <div class="absolute top-0 right-0 w-32 h-32 pointer-events-none">
-                <div class="absolute transform rotate-45 bg-primary-purple text-white text-[10px] font-bold py-1 px-10 right-[-35px] top-[20px] shadow-lg uppercase tracking-widest text-center">
-                    Chamado
-                </div>
-            </div>
-            {% endif %}
-
-            <div>
-                <div class="flex justify-between items-start mb-4">
-                    <i class="fas fa-headset text-silver text-2xl {% if tem_suporte_novo %}animate-pulse text-primary-purple{% endif %}"></i>
-                </div>
-                <h3 class="text-white font-bold uppercase text-sm mb-2">Suporte Técnico</h3>
-                <p class="text-silver text-xs mb-6 leading-relaxed">Abra chamados, tire dúvidas ou relate problemas técnicos com a equipe.</p>
-            </div>
-            <a href="{% url 'suporte:lista_chamados' %}" class="block text-center py-2 {% if tem_suporte_novo %}bg-primary-purple animate-pulse{% else %}bg-silver text-black{% endif %} font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
-                {% if tem_suporte_novo %}
-                    Ver Novas Respostas
-                {% else %}
-                    Novo Chamado
-                {% endif %}
-            </a>
-        </div>
-
         {# Painel de Gestão (Fotógrafo) #}
         {% if user.profile.is_fotografo or user.profile.is_admin_projeto or user.is_superuser %}
         <div class="card-surface p-6 rounded-lg bg-surface border-l-4 border-primary-purple flex flex-col justify-between">
@@ -138,7 +51,7 @@
                     <span class="text-[10px] bg-primary-purple px-2 py-0.5 rounded text-white uppercase font-bold">Staff</span>
                 </div>
                 <h3 class="text-white font-bold uppercase text-sm mb-2">Painel de Gestão</h3>
-                <p class="text-silver text-xs mb-6 leading-relaxed">Gestão para fotografos.</p>
+                <p class="text-silver text-xs mb-6 leading-relaxed">Gestão para fotógrafos.</p>
             </div>
             <a href="{% url 'repositorio:painel_gestao' %}" class="block text-center py-2 bg-primary-purple hover:bg-purple-hover text-white text-xs uppercase tracking-widest transition-all font-bold">Gerenciar Repositório</a>
         </div>
@@ -152,12 +65,116 @@
                     <i class="fas fa-user-shield text-error text-2xl"></i>
                 </div>
                 <h3 class="text-white font-bold uppercase text-sm mb-2">Administração Sistema</h3>
-                <p class="text-silver text-xs mb-6 leading-relaxed">Gestão de usuários, grupos de audiência e configurações globais.</p>
+                <p class="text-silver text-xs mb-6 leading-relaxed">Gestão de usuários e configurações globais.</p>
             </div>
             <a href="/admin/" target="_blank" class="block text-center py-2 bg-error hover:bg-red-700 text-white text-xs uppercase tracking-widest transition-all font-bold">Django Admin</a>
         </div>
         {% endif %}
-
     </div>
+
+    <div class="mb-12">
+        <h2 class="text-xs font-bold text-silver uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+            <span class="w-8 h-[1px] bg-success"></span> Acervo de Imagens
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {# Galerias Públicas #}
+            <div class="card-surface p-6 rounded-lg bg-surface flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-start mb-4">
+                        <i class="fas fa-images text-success text-2xl"></i>
+                        <span class="badge-public uppercase font-bold">Livre</span>
+                    </div>
+                    <h3 class="text-white font-bold uppercase text-sm mb-2">Galerias Públicas</h3>
+                    <p class="text-silver text-xs mb-6 leading-relaxed">Explore o acervo de acesso aberto.</p>
+                </div>
+                <a href="{% url 'galerias:index' %}?trilha=publica" class="block text-center py-2 bg-success hover:bg-green-700 text-white font-bold text-xs uppercase tracking-widest transition-all">Explorar</a>
+            </div>
+
+            {# Últimas (Ocupando espaço central) #}
+            <div class="flex flex-col gap-3">
+                <span class="text-[10px] uppercase font-bold text-silver/40 tracking-widest">Adicionadas Recentemente</span>
+                <div class="grid grid-cols-3 gap-2">
+                    {% for galeria in ultimas_galerias %}
+                    <a href="{% url 'galerias:detalhe_galeria' galeria.slug %}" class="group relative block aspect-square overflow-hidden rounded bg-surface border border-silver/5">
+                        {% if galeria.capa %}
+                            <img src="{{ galeria.capa.thumbnail.url }}" alt="{{ galeria.titulo }}" class="w-full h-full object-cover opacity-50 group-hover:opacity-80 transition-opacity">
+                        {% else %}
+                            <div class="w-full h-full flex items-center justify-center opacity-10">
+                                <i class="fas fa-image text-xl"></i>
+                            </div>
+                        {% endif %}
+                        <div class="absolute inset-0 p-2 flex flex-col justify-end bg-gradient-to-t from-black/90 via-black/20 to-transparent">
+                            <h3 class="text-white font-bold uppercase text-[8px] leading-tight truncate">{{ galeria.titulo }}</h3>
+                        </div>
+                    </a>
+                    {% empty %}
+                    <div class="col-span-3 aspect-[3/1] flex items-center justify-center border border-dashed border-silver/10 rounded text-[10px] text-silver uppercase">Nenhuma galeria</div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            {# Galerias Exclusivas #}
+            {% if user.is_authenticated %}
+            <div class="card-surface p-6 rounded-lg bg-surface flex flex-col justify-between">
+                <div>
+                    <div class="flex justify-between items-start mb-4">
+                        <i class="fas fa-user-lock text-primary-purple text-2xl"></i>
+                        <span class="text-[10px] bg-primary-purple px-2 py-0.5 rounded text-white uppercase font-bold">Privado</span>
+                    </div>
+                    <h3 class="text-white font-bold uppercase text-sm mb-2">Galerias Exclusivas</h3>
+                    <p class="text-silver text-xs mb-6 leading-relaxed">Acesse o conteúdo restrito disponível.</p>
+                </div>
+                <a href="{% url 'galerias:index' %}?trilha=exclusiva" class="block text-center py-2 bg-primary-purple hover:bg-purple-hover text-white font-bold text-xs uppercase tracking-widest transition-all">Acessar Conteúdo</a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="mb-12">
+        <h2 class="text-xs font-bold text-silver uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+            <span class="w-8 h-[1px] bg-primary-blue"></span> Comunicação & Suporte
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {# Chat #}
+            <div class="card-surface p-6 rounded-lg bg-surface flex flex-col justify-between relative overflow-hidden group">
+                {% if tem_mensagens_novas %}
+                <div class="absolute top-0 right-0 w-32 h-32 pointer-events-none">
+                    <div class="absolute transform rotate-45 bg-error text-white text-[10px] font-bold py-1 px-10 right-[-35px] top-[20px] shadow-lg uppercase tracking-widest text-center">Mensagem</div>
+                </div>
+                {% endif %}
+                <div>
+                    <div class="flex justify-between items-start mb-4">
+                        <i class="fas fa-comments text-primary-blue text-2xl {% if tem_mensagens_novas %}animate-bounce text-error{% endif %}"></i>
+                        <span class="text-[10px] bg-primary-blue px-2 py-0.5 rounded text-white uppercase font-bold">Real-time</span>
+                    </div>
+                    <h3 class="text-white font-bold uppercase text-sm mb-2">Canais de Chat</h3>
+                    <p class="text-silver text-xs mb-6 leading-relaxed">Acesse as salas de bate-papo exclusivas.</p>
+                </div>
+                <a href="{% url 'mensagens:lista_salas' %}" class="block text-center py-2 {% if tem_mensagens_novas %}bg-error animate-pulse{% else %}bg-primary-blue{% endif %} hover:opacity-90 text-white font-bold text-xs uppercase tracking-widest transition-all">
+                    {% if tem_mensagens_novas %}Ler Novas Mensagens{% else %}Acessar Chat{% endif %}
+                </a>
+            </div>
+
+            {# Suporte Técnico #}
+            <div class="card-surface p-6 rounded-lg bg-surface flex flex-col justify-between relative overflow-hidden group">
+                {% if tem_suporte_novo %}
+                <div class="absolute top-0 right-0 w-32 h-32 pointer-events-none">
+                    <div class="absolute transform rotate-45 bg-primary-purple text-white text-[10px] font-bold py-1 px-10 right-[-35px] top-[20px] shadow-lg uppercase tracking-widest text-center">Chamado</div>
+                </div>
+                {% endif %}
+                <div>
+                    <div class="flex justify-between items-start mb-4">
+                        <i class="fas fa-headset text-silver text-2xl {% if tem_suporte_novo %}animate-pulse text-primary-purple{% endif %}"></i>
+                    </div>
+                    <h3 class="text-white font-bold uppercase text-sm mb-2">Suporte Técnico</h3>
+                    <p class="text-silver text-xs mb-6 leading-relaxed">Abra chamados ou relate problemas técnicos.</p>
+                </div>
+                <a href="{% url 'suporte:lista_chamados' %}" class="block text-center py-2 {% if tem_suporte_novo %}bg-primary-purple animate-pulse{% else %}bg-silver text-black{% endif %} font-bold text-xs uppercase tracking-widest hover:opacity-90 transition-all">
+                    {% if tem_suporte_novo %}Ver Novas Respostas{% else %}Novo Chamado{% endif %}
+                </a>
+            </div>
+        </div>
+    </div>
+
 </div>
 {% endblock %}
