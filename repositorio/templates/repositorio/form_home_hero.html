@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Gerenciar Destaque da Home{% endblock %}
+
+{% block content %}
+<div class="bg-black min-h-screen text-white py-12">
+    <div class="container mx-auto px-4 max-w-2xl">
+
+        {# CABEÇALHO #}
+        <div class="flex items-center justify-between mb-8 border-b border-silver/10 pb-4">
+            <h1 class="text-2xl font-bold uppercase tracking-tighter">Destaque da Home (Hero)</h1>
+            <a href="{% url 'repositorio:painel_gestao' %}" class="text-silver hover:text-white transition-colors">
+                <i class="fas fa-times text-xl"></i>
+            </a>
+        </div>
+
+        {# FORMULÁRIO #}
+        <div class="bg-surface p-6 md:p-8 rounded-lg border border-silver/10 shadow-xl">
+            <form method="post" enctype="multipart/form-data" class="space-y-6">
+                {% csrf_token %}
+
+                {# CAMPO IMAGEM DE FUNDO #}
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-primary-purple uppercase tracking-widest">
+                        {{ form.hero_imagem.label }}
+                    </label>
+                    <div class="bg-black/50 p-4 rounded border border-dashed border-silver/30 hover:border-primary-purple transition-colors">
+                        {{ form.hero_imagem }}
+                    </div>
+                    {% if form.instance.hero_imagem %}
+                        <p class="text-[10px] text-silver mt-2 italic">Fundo atual configurado.</p>
+                    {% endif %}
+                    <p class="text-[10px] text-silver/60 italic">Recomendado: Imagens horizontais de alta resolução.</p>
+                </div>
+
+                {# CAMPO ARTE SOBREPOSTA (NOVO) #}
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-primary-purple uppercase tracking-widest">
+                        {{ form.hero_arte_sobreposta.label }}
+                    </label>
+                    <div class="bg-black/50 p-4 rounded border border-dashed border-silver/30 hover:border-primary-purple transition-colors">
+                        {{ form.hero_arte_sobreposta }}
+                    </div>
+                    {% if form.instance.hero_arte_sobreposta %}
+                        <p class="text-[10px] text-silver mt-2 italic">Arte sobreposta atual configurada.</p>
+                    {% endif %}
+                    <p class="text-[10px] text-silver/60 italic">Recomendado: Arquivo PNG com transparência.</p>
+                </div>
+
+                {# CAMPO LEGENDA #}
+                <div class="space-y-2">
+                    <label class="block text-xs font-bold text-primary-purple uppercase tracking-widest">
+                        {{ form.hero_legenda.label }}
+                    </label>
+                    {{ form.hero_legenda }}
+                    {% if form.hero_legenda.errors %}
+                        <p class="text-red-500 text-[10px]">{{ form.hero_legenda.errors }}</p>
+                    {% endif %}
+                </div>
+
+                {# BOTÕES #}
+                <div class="flex gap-4 pt-4">
+                    <button type="submit" class="flex-1 bg-primary-purple hover:bg-purple-hover text-white font-bold py-3 rounded uppercase tracking-widest text-sm transition-all">
+                        Salvar Alterações
+                    </button>
+                    <a href="{% url 'repositorio:painel_gestao' %}" class="flex-1 bg-transparent border border-silver/30 hover:border-silver text-silver hover:text-white py-3 rounded text-center font-bold uppercase tracking-widest text-sm transition-all">
+                        Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    /* Estilização básica para inputs do Django dentro do tema dark */
+    input[type="text"], input[type="file"] {
+        width: 100%;
+        background-color: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(192, 192, 192, 0.2);
+        border-radius: 4px;
+        padding: 0.75rem;
+        color: white;
+        font-size: 0.875rem;
+    }
+    input[type="text"]:focus {
+        outline: none;
+        border-color: #a855f7; /* primary-purple */
+    }
+</style>
+{% endblock %}

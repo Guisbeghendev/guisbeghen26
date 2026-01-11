@@ -24,4 +24,7 @@ urlpatterns = [
 
     # Ranking de Curtidas
     path('ranking/', views.ranking_curtidas_view, name='ranking_curtidas'),
+
+    # Gestão da Home (Hero e Destaque)
+    path('gestao-home/', views.gestao_home_view, name='gestao_home'), # ADICIONADO
 ]

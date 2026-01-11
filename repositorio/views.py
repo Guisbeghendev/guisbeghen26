@@ -4,8 +4,8 @@ from django.http import JsonResponse
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Count, Q
-from .models import Galeria, Midia, MarcaDagua, Categoria
-from .forms import GaleriaForm, MarcaDaguaForm
+from .models import Galeria, Midia, MarcaDagua, Categoria, ConfiguracaoHome
+from .forms import GaleriaForm, MarcaDaguaForm, ConfiguracaoHomeForm
 from .tasks import processar_imagem_task
 from galerias.utils import gerar_url_assinada_s3
 
@@ -198,3 +198,19 @@ def ranking_curtidas_view(request):
         'midias': midias,
         'galerias_filtro': galerias_filtro
     })
+
+
+@login_required
+@user_passes_test(is_fotografo)
+def gestao_home_view(request):
+    config = ConfiguracaoHome.objects.first()
+    if request.method == 'POST':
+        form = ConfiguracaoHomeForm(request.POST, request.FILES, instance=config)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Destaque da Home atualizado!")
+            return redirect('repositorio:painel_gestao')
+    else:
+        form = ConfiguracaoHomeForm(instance=config)
+
+    return render(request, 'repositorio/form_home_hero.html', {'form': form})

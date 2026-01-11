@@ -1,6 +1,5 @@
 from django import forms
-from .models import Galeria, MarcaDagua
-
+from .models import Galeria, MarcaDagua, ConfiguracaoHome
 
 class GaleriaForm(forms.ModelForm):
     data_evento = forms.DateField(
@@ -44,11 +43,23 @@ class GaleriaForm(forms.ModelForm):
         if user:
             self.fields['marca_dagua_padrao'].queryset = MarcaDagua.objects.filter(fotografo=user)
 
-
 class MarcaDaguaForm(forms.ModelForm):
     class Meta:
         model = MarcaDagua
         fields = ['nome', 'imagem', 'opacidade']
         widgets = {
             'opacidade': forms.NumberInput(attrs={'min': '0', 'max': '100'}),
+        }
+
+class ConfiguracaoHomeForm(forms.ModelForm):
+    class Meta:
+        model = ConfiguracaoHome
+        fields = ['hero_imagem', 'hero_arte_sobreposta', 'hero_legenda']
+        labels = {
+            'hero_imagem': 'Imagem de Fundo (Hero)',
+            'hero_arte_sobreposta': 'Arte Sobreposta (PNG Transparente)',
+            'hero_legenda': 'Legenda Opcional'
+        }
+        widgets = {
+            'hero_legenda': forms.TextInput(attrs={'placeholder': 'Ex: Momentos Inesquecíveis'}),
         }

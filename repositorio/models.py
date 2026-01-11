@@ -4,7 +4,6 @@ from django.utils.text import slugify
 from django.core.files.storage import storages
 import uuid
 
-# Define o storage do S3 para as mídias do repositório
 repositorio_storage = storages['repositorio_s3']
 
 class MarcaDagua(models.Model):
@@ -14,7 +13,6 @@ class MarcaDagua(models.Model):
         related_name='marcas_dagua'
     )
     nome = models.CharField(max_length=100)
-    # Marca d'água fica no S3 pois é usada no processamento do repositório
     imagem = models.ImageField(upload_to='repositorio/watermarks/', storage=repositorio_storage)
     opacidade = models.PositiveIntegerField(default=50)
     criado_em = models.DateTimeField(auto_now_add=True)
@@ -25,7 +23,6 @@ class MarcaDagua(models.Model):
 class Categoria(models.Model):
     nome = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(unique=True, blank=True)
-    # Categorias do sistema ficam no storage local (default)
     imagem_base = models.ImageField(upload_to='repositorio/categorias/')
 
     def save(self, *args, **kwargs):
@@ -88,7 +85,6 @@ class Midia(models.Model):
     ]
 
     galeria = models.ForeignKey(Galeria, on_delete=models.CASCADE, related_name='midias')
-    # Mídias utilizam o storage do S3 conforme solicitado
     arquivo_original = models.FileField(upload_to='repositorio/originais/%Y/%m/%d/', storage=repositorio_storage)
     arquivo_processado = models.FileField(upload_to='repositorio/processadas/%Y/%m/%d/', null=True, blank=True, storage=repositorio_storage)
     thumbnail = models.ImageField(upload_to='repositorio/thumbs/%Y/%m/%d/', null=True, blank=True, storage=repositorio_storage)
@@ -97,3 +93,16 @@ class Midia(models.Model):
 
     def __str__(self):
         return f"Midia {self.id} - Galeria: {self.galeria.titulo}"
+
+class ConfiguracaoHome(models.Model):
+    hero_imagem = models.ImageField(upload_to='home/hero/', null=True, blank=True)
+    hero_legenda = models.CharField(max_length=255, null=True, blank=True)
+    hero_arte_sobreposta = models.ImageField(
+        upload_to='home/arte/',
+        null=True,
+        blank=True,
+        help_text="Arte em PNG transparente para flutuar sobre o Hero"
+    )
+
+    class Meta:
+        verbose_name = "Configuração da Home"

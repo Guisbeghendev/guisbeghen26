@@ -1,17 +1,17 @@
 from django.shortcuts import render
-from repositorio.models import Galeria, Categoria
+from django.db.models import Count
+from repositorio.models import Galeria, Categoria, Midia, ConfiguracaoHome
 from galerias.utils import gerar_url_assinada_s3
-
+from galerias.models import Curtida
+from django.utils import timezone
+from datetime import timedelta
 
 def index(request):
-    # --- BLOCO EXISTENTE (INTOCADO) ---
     ultimas_publicas = Galeria.objects.filter(
         acesso_publico=True,
         status='publicada'
     ).order_by('-data_evento', '-id')[:3]
-    # ---------------------------------
 
-    # ACRESCENTANDO: Busca de categorias com galerias públicas
     categorias_carrossel = []
     categorias_com_galerias_pub = Categoria.objects.filter(
         galerias__status='publicada',
@@ -19,7 +19,6 @@ def index(request):
     ).distinct()
 
     for cat in categorias_com_galerias_pub:
-        # Pega a galeria pública mais recente desta categoria para a capa do carrossel
         ultima_galeria_pub = Galeria.objects.filter(
             categoria=cat,
             status='publicada',
@@ -27,7 +26,6 @@ def index(request):
         ).order_by('-data_evento').first()
 
         if ultima_galeria_pub and ultima_galeria_pub.capa:
-            # Define qual arquivo usar (processado ou thumbnail)
             path = ultima_galeria_pub.capa.arquivo_processado.name if ultima_galeria_pub.capa.arquivo_processado else ultima_galeria_pub.capa.thumbnail.name
             url_img = gerar_url_assinada_s3(path)
 
@@ -37,7 +35,36 @@ def index(request):
                 'url_imagem': url_img
             })
 
+    hero_config = ConfiguracaoHome.objects.first()
+    hero_url = None
+    hero_arte_url = None
+
+    if hero_config:
+        if hero_config.hero_imagem:
+            hero_url = hero_config.hero_imagem.url
+        if hero_config.hero_arte_sobreposta:
+            hero_arte_url = hero_config.hero_arte_sobreposta.url
+
+    total_uploads = Midia.objects.filter(status_processamento='disponivel').count()
+    total_galerias = Galeria.objects.filter(status='publicada').count()
+    total_curtidas = Curtida.objects.count()
+
+    seis_meses_atras = timezone.now() - timedelta(days=180)
+    uploads_recentes = Midia.objects.filter(criado_em__gte=seis_meses_atras).count()
+    media_mensal = round(uploads_recentes / 6) if uploads_recentes > 0 else 0
+
+    stats = {
+        'uploads': total_uploads,
+        'galerias': total_galerias,
+        'curtidas': total_curtidas,
+        'media': media_mensal
+    }
+
     return render(request, 'core/home.html', {
         'ultimas_publicas': ultimas_publicas,
-        'categorias_carrossel': categorias_carrossel
+        'categorias_carrossel': categorias_carrossel,
+        'hero_url': hero_url,
+        'hero_arte_url': hero_arte_url,
+        'hero_config': hero_config,
+        'stats': stats
     })

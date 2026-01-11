@@ -10,6 +10,11 @@
             <p class="text-silver">Gerencie seu acervo fotográfico</p>
         </div>
         <div class="flex gap-4">
+            {# NOVO BOTÃO: GESTÃO DO HERO #}
+            <a href="{% url 'repositorio:gestao_home' %}" class="px-4 py-2 border border-primary-purple text-primary-purple hover:bg-primary-purple hover:text-white transition-all text-xs uppercase font-bold tracking-widest">
+                <i class="fas fa-image mr-2"></i> Destaque da Home
+            </a>
+
             <a href="{% url 'repositorio:ranking_curtidas' %}" class="px-4 py-2 border border-success text-success hover:bg-success hover:text-white transition-all text-xs uppercase font-bold tracking-widest">
                 <i class="fas fa-trophy mr-2"></i> Ranking de Curtidas
             </a>
