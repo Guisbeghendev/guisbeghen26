@@ -49,6 +49,9 @@ def dashboard_view(request):
     tem_mensagens_novas = False
     tem_suporte_novo = False
 
+    # Captura o termo de busca
+    search_query = request.GET.get('search', '').strip()
+
     # --- Lógica do Chat Mensagens ---
     salas = SalaChat.objects.filter(grupo__in=user.grupos_audiencia.all())
     for sala in salas:
@@ -77,13 +80,22 @@ def dashboard_view(request):
             remetente__is_staff=True
         ).exists()
 
-    # --- Últimas Galerias Publicadas ---
-    ultimas_galerias = Galeria.objects.filter(status='publicada').order_by('-atualizado_em')[:3]
+    # --- Lógica de Galerias (Com Busca e Segurança de Grupo) ---
+    galerias_queryset = Galeria.objects.filter(
+        status='publicada',
+        grupos_audiencia__in=user.grupos_audiencia.all()
+    ).distinct()
+
+    if search_query:
+        ultimas_galerias = galerias_queryset.filter(titulo__icontains=search_query).order_by('-atualizado_em')
+    else:
+        ultimas_galerias = galerias_queryset.order_by('-atualizado_em')[:3]
 
     return render(request, 'users/dashboard.html', {
         'tem_mensagens_novas': tem_mensagens_novas,
         'tem_suporte_novo': tem_suporte_novo,
-        'ultimas_galerias': ultimas_galerias
+        'ultimas_galerias': ultimas_galerias,
+        'search_query': search_query
     })
 
 

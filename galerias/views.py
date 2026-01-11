@@ -1,4 +1,4 @@
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.db.models import Count, Q
@@ -183,3 +183,40 @@ def toggle_curtida(request, midia_id):
         return JsonResponse({'status': status, 'total_foto': total_foto})
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
+
+def busca_galerias(request):
+    query = request.GET.get('search', '').strip()
+    if not query:
+        return redirect('users:dashboard')
+
+    user_profile = getattr(request.user, 'profile', None)
+    is_staff = request.user.is_authenticated and (
+        request.user.is_superuser or
+        (user_profile and (user_profile.is_fotografo or user_profile.is_admin_projeto))
+    )
+
+    if is_staff:
+        galerias_qs = Galeria.objects.filter(status='publicada')
+    elif request.user.is_authenticated:
+        galerias_qs = Galeria.objects.filter(
+            Q(status='publicada') &
+            (Q(acesso_publico=True) | Q(grupos_audiencia__in=request.user.grupos_audiencia.all()))
+        )
+    else:
+        galerias_qs = Galeria.objects.filter(status='publicada', acesso_publico=True)
+
+    galerias = galerias_qs.filter(titulo__icontains=query).select_related('capa').distinct()
+
+    for galeria in galerias:
+        if galeria.capa and galeria.capa.arquivo_processado:
+            galeria.url_capa = gerar_url_assinada_s3(galeria.capa.arquivo_processado.name)
+        elif galeria.capa and galeria.capa.thumbnail:
+            galeria.url_capa = gerar_url_assinada_s3(galeria.capa.thumbnail.name)
+        else:
+            galeria.url_capa = None
+
+    return render(request, 'galerias/busca.html', {
+        'galerias': galerias,
+        'query': query
+    })

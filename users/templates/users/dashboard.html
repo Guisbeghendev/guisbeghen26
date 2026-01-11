@@ -11,6 +11,20 @@
             <h1 class="text-4xl font-bold text-primary-purple uppercase tracking-tighter">Dashboard</h1>
             <p class="text-silver mt-1">Bem-vindo, <span class="text-white font-semibold">{{ user.username }}</span></p>
         </div>
+
+        {# Ajustado: Aponta para a nova rota de busca em galerias #}
+        <div class="w-full md:w-96">
+            <form method="GET" action="{% url 'galerias:busca_galerias' %}" class="relative">
+                <input type="text"
+                       name="search"
+                       placeholder="Buscar galeria nos meus grupos..."
+                       class="w-full bg-surface border border-silver/20 rounded py-2 px-4 text-white text-xs uppercase tracking-widest focus:border-primary-purple outline-none transition-all">
+                <button type="submit" class="absolute right-3 top-2.5 text-silver hover:text-primary-purple">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+
         <div class="flex gap-3">
             <span class="badge-group">Grupo: {{ user.grupos_audiencia.first.nome|default:"Nenhum" }}</span>
             <a href="{% url 'users:logout' %}" class="text-xs uppercase tracking-widest text-error hover:underline">Sair</a>
@@ -90,7 +104,7 @@
                 <a href="{% url 'galerias:index' %}?trilha=publica" class="block text-center py-2 bg-success hover:bg-green-700 text-white font-bold text-xs uppercase tracking-widest transition-all">Explorar</a>
             </div>
 
-            {# Últimas (Ocupando espaço central) #}
+            {# Últimas (Mantido original, sem lógica de busca interna) #}
             <div class="flex flex-col gap-3">
                 <span class="text-[10px] uppercase font-bold text-silver/40 tracking-widest">Adicionadas Recentemente</span>
                 <div class="grid grid-cols-3 gap-2">

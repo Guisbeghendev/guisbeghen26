@@ -19,4 +19,7 @@ urlpatterns = [
 
     # Ações
     path('curtir/<int:midia_id>/', views.toggle_curtida, name='toggle_curtida'),
+
+    # busca nome galeria via dashboard
+    path('busca/', views.busca_galerias, name='busca_galerias'),
 ]
