@@ -2,8 +2,16 @@
 <header class="bg-black border-b border-silver/10">
     <nav class="container mx-auto px-8 py-1 flex justify-between items-center">
         <div class="flex items-center">
-            <a href="{% url 'core:index' %}">
-                <img src="{% static 'images/logo_horiz7.png' %}" alt="Guisbeghen" style="height: 90px !important; width: auto;">
+            <a href="{% url 'core:index' %}" class="relative block" style="height: 90px; width: 250px;">
+                <div class="absolute inset-0 flex items-center justify-start">
+                    <div class="relative inline-block h-full">
+                        <div class="absolute inset-0 logo-anim-bg z-0"></div>
+
+                        <img src="{% static 'images/logo_horiz_transp.png' %}"
+                             alt="Guisbeghen"
+                             class="relative z-10 h-full w-auto block">
+                    </div>
+                </div>
             </a>
         </div>
 
@@ -91,6 +99,20 @@
             {% endif %}
         </div>
     </div>
+
+    <style>
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .logo-anim-bg {
+            background: linear-gradient(-45deg, #DE3163, #0000A6, #006742);
+            background-size: 200% 200%;
+            animation: gradientShift 3s ease infinite;
+        }
+    </style>
 
     <script>
         const btn = document.getElementById('mobile-menu-button');
