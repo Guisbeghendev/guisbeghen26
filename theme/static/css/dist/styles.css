@@ -938,6 +938,12 @@
   .bg-silver {
     background-color: var(--color-silver);
   }
+  .bg-silver\/10 {
+    background-color: color-mix(in srgb, #ADB5BD 10%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      background-color: color-mix(in oklab, var(--color-silver) 10%, transparent);
+    }
+  }
   .bg-success {
     background-color: var(--color-success);
   }
@@ -988,6 +994,9 @@
   }
   .p-2 {
     padding: calc(var(--spacing) * 2);
+  }
+  .p-2\.5 {
+    padding: calc(var(--spacing) * 2.5);
   }
   .p-3 {
     padding: calc(var(--spacing) * 3);
@@ -1390,6 +1399,10 @@
     --tw-duration: 700ms;
     transition-duration: 700ms;
   }
+  .outline-none {
+    --tw-outline-style: none;
+    outline-style: none;
+  }
   .group-hover\:translate-x-1 {
     &:is(:where(.group):hover *) {
       @media (hover: hover) {
@@ -1623,6 +1636,16 @@
         background-color: color-mix(in srgb, #ADB5BD 5%, transparent);
         @supports (color: color-mix(in lab, red, red)) {
           background-color: color-mix(in oklab, var(--color-silver) 5%, transparent);
+        }
+      }
+    }
+  }
+  .hover\:bg-silver\/20 {
+    &:hover {
+      @media (hover: hover) {
+        background-color: color-mix(in srgb, #ADB5BD 20%, transparent);
+        @supports (color: color-mix(in lab, red, red)) {
+          background-color: color-mix(in oklab, var(--color-silver) 20%, transparent);
         }
       }
     }

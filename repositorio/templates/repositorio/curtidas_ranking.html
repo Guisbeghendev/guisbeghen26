@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-8 border-b border-silver/10 pb-6">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-silver/10 pb-6 gap-4">
         <div>
             <h1 class="text-3xl font-bold text-primary-purple uppercase tracking-tighter">Ranking de Engajamento</h1>
             <p class="text-silver">Fotos mais curtidas pelos seus clientes</p>
@@ -13,6 +13,30 @@
             <a href="{% url 'repositorio:painel_gestao' %}" class="px-4 py-2 border border-silver text-silver hover:text-white hover:border-white transition-all text-xs uppercase font-bold tracking-widest">Voltar ao Painel</a>
         </div>
     </div>
+
+    <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10 bg-surface p-6 rounded-lg border border-silver/5">
+        <div>
+            <label class="block text-[10px] uppercase font-bold text-silver mb-2 tracking-widest">Galeria</label>
+            <select name="galeria_id" class="w-full bg-black border border-silver/20 text-white text-xs p-2 rounded focus:border-primary-purple outline-none">
+                <option value="">Todas as Galerias</option>
+                {% for g in galerias_filtro %}
+                    <option value="{{ g.id }}" {% if request.GET.galeria_id == g.id|stringformat:"i" %}selected{% endif %}>{{ g.titulo }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="block text-[10px] uppercase font-bold text-silver mb-2 tracking-widest">Início</label>
+            <input type="date" name="data_inicio" value="{{ request.GET.data_inicio }}" class="w-full bg-black border border-silver/20 text-white text-xs p-2 rounded focus:border-primary-purple outline-none">
+        </div>
+        <div>
+            <label class="block text-[10px] uppercase font-bold text-silver mb-2 tracking-widest">Fim</label>
+            <input type="date" name="data_fim" value="{{ request.GET.data_fim }}" class="w-full bg-black border border-silver/20 text-white text-xs p-2 rounded focus:border-primary-purple outline-none">
+        </div>
+        <div class="flex items-end gap-2">
+            <button type="submit" class="flex-1 bg-primary-purple hover:bg-purple-hover text-white text-[10px] uppercase font-bold p-2.5 rounded transition-all">Filtrar</button>
+            <a href="{% url 'repositorio:ranking_curtidas' %}" class="bg-silver/10 hover:bg-silver/20 text-white text-[10px] uppercase font-bold p-2.5 rounded transition-all">Limpar</a>
+        </div>
+    </form>
 
     {% if midias %}
     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6">
@@ -45,7 +69,7 @@
     </div>
     {% else %}
     <div class="py-20 text-center border-2 border-dashed border-silver/10">
-        <p class="text-silver uppercase tracking-widest text-sm">Nenhuma curtida registrada em suas fotos ainda.</p>
+        <p class="text-silver uppercase tracking-widest text-sm">Nenhuma curtida encontrada com esses filtros.</p>
     </div>
     {% endif %}
 </div>

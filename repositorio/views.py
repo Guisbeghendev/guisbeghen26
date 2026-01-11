@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import JsonResponse
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Count
+from django.db.models import Count, Q
 from .models import Galeria, Midia, MarcaDagua, Categoria
 from .forms import GaleriaForm, MarcaDaguaForm
 from .tasks import processar_imagem_task
@@ -167,11 +167,26 @@ def alterar_status_galeria_view(request, slug, novo_status):
 @user_passes_test(is_fotografo)
 def ranking_curtidas_view(request):
     midias_query = Midia.objects.filter(status_processamento='disponivel')
+    galerias_filtro = Galeria.objects.filter(fotografo=request.user)
 
     if not request.user.is_superuser:
         midias_query = midias_query.filter(galeria__fotografo=request.user)
 
-    midias = midias_query.annotate(total_likes=Count('curtidas_recebidas')) \
+    # Filtros
+    data_inicio = request.GET.get('data_inicio')
+    data_fim = request.GET.get('data_fim')
+    galeria_id = request.GET.get('galeria_id')
+
+    filtro_likes = Q()
+    if data_inicio:
+        filtro_likes &= Q(curtidas_recebidas__criado_em__date__gte=data_inicio)
+    if data_fim:
+        filtro_likes &= Q(curtidas_recebidas__criado_em__date__lte=data_fim)
+
+    if galeria_id:
+        midias_query = midias_query.filter(galeria_id=galeria_id)
+
+    midias = midias_query.annotate(total_likes=Count('curtidas_recebidas', filter=filtro_likes)) \
         .filter(total_likes__gt=0) \
         .order_by('-total_likes')
 
@@ -179,4 +194,7 @@ def ranking_curtidas_view(request):
         if midia.thumbnail:
             midia.url_thumb = gerar_url_assinada_s3(midia.thumbnail.name)
 
-    return render(request, 'repositorio/curtidas_ranking.html', {'midias': midias})
+    return render(request, 'repositorio/curtidas_ranking.html', {
+        'midias': midias,
+        'galerias_filtro': galerias_filtro
+    })
