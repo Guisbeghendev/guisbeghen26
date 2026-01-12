@@ -123,10 +123,11 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+# Mídia Local (Padrão para todo o projeto)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# --- CONFIGURAÇÃO AWS S3 (Apenas para Repositório) ---
+# --- CONFIGURAÇÃO AWS S3 (Específica para Repositório) ---
 AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
 AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
 AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME')
@@ -134,14 +135,12 @@ AWS_S3_REGION_NAME = env('AWS_S3_REGION_NAME')
 AWS_S3_QUERYSTRING_AUTH = True
 AWS_S3_SIGNATURE_VERSION = 's3v4'
 AWS_S3_FILE_OVERWRITE = False
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
 
 # --- GESTÃO DE ARMAZENAMENTO HÍBRIDO ---
-AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
-MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
-
 STORAGES = {
     "default": {
-        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
     },
     "staticfiles": {
         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
@@ -164,7 +163,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 TAILWIND_APP_NAME = 'theme'
 INTERNAL_IPS = ['127.0.0.1']
 TAILWIND_CSS_PATH = 'css/tailwind.css'
-#TAILWIND_BINARY_PATH = os.path.join(BASE_DIR, '.bin', 'tailwindcss.exe')
 
 # ==============================================================================
 # 9. CONFIGURAÇÕES DE AUTENTICAÇÃO E PERFIL
