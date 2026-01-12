@@ -136,9 +136,12 @@ AWS_S3_SIGNATURE_VERSION = 's3v4'
 AWS_S3_FILE_OVERWRITE = False
 
 # --- GESTÃO DE ARMAZENAMENTO HÍBRIDO ---
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+MEDIA_URL = f'https://{AWS_S3_CUSTOM_DOMAIN}/'
+
 STORAGES = {
     "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
     },
     "staticfiles": {
         "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
