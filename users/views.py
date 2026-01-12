@@ -7,6 +7,7 @@ from .forms import CustomUserCreationForm, ProfileForm
 from mensagens.models import SalaChat, MensagemChat, VisualizacaoMensagem
 from suporte.models import TopicoSuporte, MensagemSuporte
 from repositorio.models import Galeria
+from galerias.utils import gerar_url_assinada_s3
 
 
 def register_view(request):
@@ -84,12 +85,25 @@ def dashboard_view(request):
     galerias_queryset = Galeria.objects.filter(
         status='publicada',
         grupos_audiencia__in=user.grupos_audiencia.all()
-    ).distinct()
+    ).select_related('capa').distinct()
 
     if search_query:
-        ultimas_galerias = galerias_queryset.filter(titulo__icontains=search_query).order_by('-atualizado_em')
+        galerias_final = galerias_queryset.filter(titulo__icontains=search_query).order_by('-atualizado_em')
     else:
-        ultimas_galerias = galerias_queryset.order_by('-atualizado_em')[:3]
+        galerias_final = galerias_queryset.order_by('-atualizado_em')[:3]
+
+    # Processamento de URLs assinadas para o S3
+    ultimas_galerias = []
+    for g in galerias_final:
+        url_capa = None
+        if g.capa:
+            path = g.capa.thumbnail.name if g.capa.thumbnail else g.capa.arquivo_processado.name
+            url_capa = gerar_url_assinada_s3(path)
+
+        ultimas_galerias.append({
+            'instancia': g,
+            'url_capa': url_capa
+        })
 
     return render(request, 'users/dashboard.html', {
         'tem_mensagens_novas': tem_mensagens_novas,

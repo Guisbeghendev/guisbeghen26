@@ -96,19 +96,19 @@
             <span class="w-8 h-[1px] bg-primary-purple"></span> Novidades Públicas
         </h2>
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {% for galeria in ultimas_publicas %}
-            <a href="{% url 'galerias:detalhe_galeria' galeria.slug %}" class="group relative block aspect-video overflow-hidden rounded-lg bg-surface border border-silver/5">
-                {% if galeria.capa %}
-                    <img src="{{ galeria.capa.thumbnail.url }}" alt="{{ galeria.titulo }}" class="w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-opacity">
+            {% for item in ultimas_publicas %}
+            <a href="{% url 'galerias:detalhe_galeria' item.instancia.slug %}" class="group relative block aspect-video overflow-hidden rounded-lg bg-surface border border-silver/5">
+                {% if item.url_capa %}
+                    <img src="{{ item.url_capa }}" alt="{{ item.instancia.titulo }}" class="w-full h-full object-cover opacity-40 group-hover:opacity-60 transition-opacity">
                 {% else %}
                     <div class="w-full h-full flex items-center justify-center opacity-10">
                         <i class="fas fa-image text-4xl"></i>
                     </div>
                 {% endif %}
                 <div class="absolute inset-0 p-4 flex flex-col justify-end bg-gradient-to-t from-black/80 to-transparent">
-                    <span class="text-[9px] uppercase font-bold text-primary-purple tracking-widest mb-1">{{ galeria.categoria.nome }}</span>
-                    <h3 class="text-white font-bold uppercase text-xs truncate">{{ galeria.titulo }}</h3>
-                    <p class="text-silver text-[9px]">{{ galeria.data_evento|date:"d/m/Y" }}</p>
+                    <span class="text-[9px] uppercase font-bold text-primary-purple tracking-widest mb-1">{{ item.instancia.categoria.nome }}</span>
+                    <h3 class="text-white font-bold uppercase text-xs truncate">{{ item.instancia.titulo }}</h3>
+                    <p class="text-silver text-[9px]">{{ item.instancia.data_evento|date:"d/m/Y" }}</p>
                 </div>
             </a>
             {% endfor %}

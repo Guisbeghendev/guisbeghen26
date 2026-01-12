@@ -6,11 +6,26 @@ from galerias.models import Curtida
 from django.utils import timezone
 from datetime import timedelta
 
+
 def index(request):
-    ultimas_publicas = Galeria.objects.filter(
+    # Ajustado para gerar URLs assinadas das capas das galerias
+    galerias_qs = Galeria.objects.filter(
         acesso_publico=True,
         status='publicada'
-    ).order_by('-data_evento', '-id')[:3]
+    ).select_related('capa', 'categoria').order_by('-data_evento', '-id')[:3]
+
+    ultimas_publicas = []
+    for g in galerias_qs:
+        url_capa = None
+        if g.capa:
+            # Tenta thumbnail, se não existir usa arquivo_processado
+            path = g.capa.thumbnail.name if g.capa.thumbnail else g.capa.arquivo_processado.name
+            url_capa = gerar_url_assinada_s3(path)
+
+        ultimas_publicas.append({
+            'instancia': g,
+            'url_capa': url_capa
+        })
 
     categorias_carrossel = []
     categorias_com_galerias_pub = Categoria.objects.filter(
@@ -41,9 +56,9 @@ def index(request):
 
     if hero_config:
         if hero_config.hero_imagem:
-            hero_url = hero_config.hero_imagem.url
+            hero_url = gerar_url_assinada_s3(hero_config.hero_imagem.name)
         if hero_config.hero_arte_sobreposta:
-            hero_arte_url = hero_config.hero_arte_sobreposta.url
+            hero_arte_url = gerar_url_assinada_s3(hero_config.hero_arte_sobreposta.name)
 
     total_uploads = Midia.objects.filter(status_processamento='disponivel').count()
     total_galerias = Galeria.objects.filter(status='publicada').count()

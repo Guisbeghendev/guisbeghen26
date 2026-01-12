@@ -12,7 +12,6 @@
             <p class="text-silver mt-1">Bem-vindo, <span class="text-white font-semibold">{{ user.username }}</span></p>
         </div>
 
-        {# Ajustado: Aponta para a nova rota de busca em galerias #}
         <div class="w-full md:w-96">
             <form method="GET" action="{% url 'galerias:busca_galerias' %}" class="relative">
                 <input type="text"
@@ -104,21 +103,21 @@
                 <a href="{% url 'galerias:index' %}?trilha=publica" class="block text-center py-2 bg-success hover:bg-green-700 text-white font-bold text-xs uppercase tracking-widest transition-all">Explorar</a>
             </div>
 
-            {# Últimas (Mantido original, sem lógica de busca interna) #}
+            {# Últimas #}
             <div class="flex flex-col gap-3">
                 <span class="text-[10px] uppercase font-bold text-silver/40 tracking-widest">Adicionadas Recentemente</span>
                 <div class="grid grid-cols-3 gap-2">
-                    {% for galeria in ultimas_galerias %}
-                    <a href="{% url 'galerias:detalhe_galeria' galeria.slug %}" class="group relative block aspect-square overflow-hidden rounded bg-surface border border-silver/5">
-                        {% if galeria.capa %}
-                            <img src="{{ galeria.capa.thumbnail.url }}" alt="{{ galeria.titulo }}" class="w-full h-full object-cover opacity-50 group-hover:opacity-80 transition-opacity">
+                    {% for item in ultimas_galerias %}
+                    <a href="{% url 'galerias:detalhe_galeria' item.instancia.slug %}" class="group relative block aspect-square overflow-hidden rounded bg-surface border border-silver/5">
+                        {% if item.url_capa %}
+                            <img src="{{ item.url_capa }}" alt="{{ item.instancia.titulo }}" class="w-full h-full object-cover opacity-50 group-hover:opacity-80 transition-opacity">
                         {% else %}
                             <div class="w-full h-full flex items-center justify-center opacity-10">
                                 <i class="fas fa-image text-xl"></i>
                             </div>
                         {% endif %}
                         <div class="absolute inset-0 p-2 flex flex-col justify-end bg-gradient-to-t from-black/90 via-black/20 to-transparent">
-                            <h3 class="text-white font-bold uppercase text-[8px] leading-tight truncate">{{ galeria.titulo }}</h3>
+                            <h3 class="text-white font-bold uppercase text-[8px] leading-tight truncate">{{ item.instancia.titulo }}</h3>
                         </div>
                     </a>
                     {% empty %}
