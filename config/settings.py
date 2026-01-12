@@ -161,7 +161,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 TAILWIND_APP_NAME = 'theme'
 INTERNAL_IPS = ['127.0.0.1']
 TAILWIND_CSS_PATH = 'css/tailwind.css'
-TAILWIND_BINARY_PATH = os.path.join(BASE_DIR, '.bin', 'tailwindcss.exe')
+#TAILWIND_BINARY_PATH = os.path.join(BASE_DIR, '.bin', 'tailwindcss.exe')
 
 # ==============================================================================
 # 9. CONFIGURAÇÕES DE AUTENTICAÇÃO E PERFIL

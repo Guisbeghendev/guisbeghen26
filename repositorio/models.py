@@ -23,7 +23,7 @@ class MarcaDagua(models.Model):
 class Categoria(models.Model):
     nome = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(unique=True, blank=True)
-    imagem_base = models.ImageField(upload_to='repositorio/categorias/')
+    imagem_base = models.ImageField(upload_to='repositorio/categorias/', storage=repositorio_storage)
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -95,12 +95,13 @@ class Midia(models.Model):
         return f"Midia {self.id} - Galeria: {self.galeria.titulo}"
 
 class ConfiguracaoHome(models.Model):
-    hero_imagem = models.ImageField(upload_to='home/hero/', null=True, blank=True)
+    hero_imagem = models.ImageField(upload_to='home/hero/', null=True, blank=True, storage=repositorio_storage)
     hero_legenda = models.CharField(max_length=255, null=True, blank=True)
     hero_arte_sobreposta = models.ImageField(
         upload_to='home/arte/',
         null=True,
         blank=True,
+        storage=repositorio_storage,
         help_text="Arte em PNG transparente para flutuar sobre o Hero"
     )
 
