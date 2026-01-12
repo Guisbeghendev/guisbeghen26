@@ -23,7 +23,7 @@ class MarcaDagua(models.Model):
 class Categoria(models.Model):
     nome = models.CharField(max_length=100, unique=True)
     slug = models.SlugField(unique=True, blank=True)
-    imagem_base = models.ImageField(upload_to='repositorio/categorias/', storage=repositorio_storage)
+    imagem_base = models.ImageField(upload_to='categorias/')
 
     def save(self, *args, **kwargs):
         if not self.slug:
