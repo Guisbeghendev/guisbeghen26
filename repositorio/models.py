@@ -13,7 +13,7 @@ class MarcaDagua(models.Model):
         related_name='marcas_dagua'
     )
     nome = models.CharField(max_length=100)
-    imagem = models.ImageField(upload_to='repositorio/watermarks/', storage=repositorio_storage)
+    imagem = models.ImageField(upload_to='acervo/watermarks/', storage=repositorio_storage)
     opacidade = models.PositiveIntegerField(default=50)
     criado_em = models.DateTimeField(auto_now_add=True)
 
@@ -85,9 +85,9 @@ class Midia(models.Model):
     ]
 
     galeria = models.ForeignKey(Galeria, on_delete=models.CASCADE, related_name='midias')
-    arquivo_original = models.FileField(upload_to='repositorio/originais/%Y/%m/%d/', storage=repositorio_storage)
-    arquivo_processado = models.FileField(upload_to='repositorio/processadas/%Y/%m/%d/', null=True, blank=True, storage=repositorio_storage)
-    thumbnail = models.ImageField(upload_to='repositorio/thumbs/%Y/%m/%d/', null=True, blank=True, storage=repositorio_storage)
+    arquivo_original = models.FileField(upload_to='acervo/originais/%Y/%m/%d/', storage=repositorio_storage)
+    arquivo_processado = models.FileField(upload_to='acervo/processadas/%Y/%m/%d/', null=True, blank=True, storage=repositorio_storage)
+    thumbnail = models.ImageField(upload_to='acervo/thumbs/%Y/%m/%d/', null=True, blank=True, storage=repositorio_storage)
     status_processamento = models.CharField(max_length=20, choices=STATUS_PROC, default='pendente', db_index=True)
     criado_em = models.DateTimeField(auto_now_add=True)
 
@@ -95,10 +95,10 @@ class Midia(models.Model):
         return f"Midia {self.id} - Galeria: {self.galeria.titulo}"
 
 class ConfiguracaoHome(models.Model):
-    hero_imagem = models.ImageField(upload_to='home/hero/', null=True, blank=True, storage=repositorio_storage)
+    hero_imagem = models.ImageField(upload_to='acervo/home/hero/', null=True, blank=True, storage=repositorio_storage)
     hero_legenda = models.CharField(max_length=255, null=True, blank=True)
     hero_arte_sobreposta = models.ImageField(
-        upload_to='home/arte/',
+        upload_to='acervo/home/arte/',
         null=True,
         blank=True,
         storage=repositorio_storage,
