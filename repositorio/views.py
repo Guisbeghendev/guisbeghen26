@@ -154,8 +154,9 @@ def lista_marcas_view(request):
     for m in marcas_qs:
         url_assinada = None
         if m.imagem:
-            # Garante que passamos o caminho relativo do arquivo no bucket
-            url_assinada = gerar_url_assinada_s3(str(m.imagem))
+            # A alteração é trocar str(m.imagem) por m.imagem.name
+            # O atributo .name retorna o caminho relativo exato exigido pelo S3
+            url_assinada = gerar_url_assinada_s3(m.imagem.name)
         marcas_com_url.append({
             'instancia': m,
             'url_assinada': url_assinada
