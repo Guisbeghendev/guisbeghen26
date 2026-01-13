@@ -38,21 +38,21 @@
         <h2 class="text-white font-bold uppercase text-xs tracking-widest mb-6">Mídias no Repositório (<span id="mediaCount">{{ midias.count }}</span>)</h2>
         <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" id="mediaGrid">
             {% for midia in midias %}
-            <div class="relative group aspect-square bg-black border border-silver/10 overflow-hidden" id="midia-{{ midia.id }}">
-                {% if midia.thumbnail %}
-                    <img src="{{ midia.thumbnail.url }}" class="w-full h-full object-cover {% if midia.status_processamento != 'disponivel' %}opacity-30{% endif %}">
+            <div class="relative group aspect-square bg-black border border-silver/10 overflow-hidden" id="midia-{{ midia.instancia.id }}">
+                <div class="img-container w-full h-full">
+                {% if midia.url_thumb %}
+                    <img src="{{ midia.url_thumb }}" class="w-full h-full object-cover {% if midia.instancia.status_processamento != 'disponivel' %}opacity-30{% endif %}">
                 {% else %}
                     <div class="w-full h-full flex items-center justify-center text-silver/20"><i class="fas fa-sync fa-spin"></i></div>
                 {% endif %}
-
-                <div class="absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center gap-2">
-                    {% if midia.status_processamento == 'disponivel' %}
-                        <a href="{% url 'repositorio:definir_capa' midia.pk %}" class="text-[10px] text-white uppercase font-bold hover:text-success"><i class="fas fa-star mr-1"></i> Capa</a>
-                    {% endif %}
-                    <button onclick="excluirMidia({{ midia.id }})" class="text-[10px] text-error uppercase font-bold"><i class="fas fa-trash"></i> Excluir</button>
                 </div>
 
-                {% if galeria.capa == midia %}
+                <div class="overlay-actions absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center gap-2 {% if midia.instancia.status_processamento != 'disponivel' %}hidden{% endif %}">
+                    <a href="{% url 'repositorio:definir_capa' midia.instancia.pk %}" class="text-[10px] text-white uppercase font-bold hover:text-success"><i class="fas fa-star mr-1"></i> Capa</a>
+                    <button onclick="excluirMidia({{ midia.instancia.id }})" class="text-[10px] text-error uppercase font-bold"><i class="fas fa-trash"></i> Excluir</button>
+                </div>
+
+                {% if galeria.capa == midia.instancia %}
                     <div class="absolute top-0 left-0 bg-success text-white text-[8px] font-bold px-2 py-1 uppercase">Capa</div>
                 {% endif %}
             </div>
@@ -87,7 +87,7 @@ statusSocket.onmessage = function(e) {
         globalPercText.innerText = data.progresso + '%';
         globalStatusText.innerText = `Processando: ${data.concluidas} de ${data.total} imagens`;
 
-        // Atualiza a imagem na grade em tempo real
+        // CORREÇÃO: Busca do elemento e injeção da URL assinada recebida via WebSocket
         if (data.midia_id) {
             const midiaElement = document.getElementById(`midia-${data.midia_id}`);
             if (midiaElement) {
@@ -95,7 +95,9 @@ statusSocket.onmessage = function(e) {
                 if (imgContainer && data.url_thumb) {
                     imgContainer.innerHTML = `<img src="${data.url_thumb}" class="w-full h-full object-cover">`;
                 }
-                midiaElement.querySelector('.overlay-actions').classList.remove('hidden');
+                // Habilita as ações do overlay após processamento
+                const overlay = midiaElement.querySelector('.overlay-actions');
+                if(overlay) overlay.classList.remove('hidden');
             }
         }
 

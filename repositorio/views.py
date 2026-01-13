@@ -76,6 +76,7 @@ def upload_midia_view(request, slug):
         indice = int(request.POST.get('current_index', 1))
         opacidade = int(request.POST.get('opacidade', 50))
 
+        # CORREÇÃO: transaction.atomic + on_commit garante que o arquivo esteja pronto no storage antes da task iniciar
         with transaction.atomic():
             midia = Midia.objects.create(
                 galeria=galeria,
