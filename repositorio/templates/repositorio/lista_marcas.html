@@ -19,7 +19,6 @@
         {% for item in marcas %}
         <div class="card-surface bg-surface rounded-lg overflow-hidden border border-silver/5 flex flex-col">
             <div class="h-40 bg-black flex items-center justify-center p-4">
-                {# Ajustado para usar item.url_assinada conforme definido na view #}
                 {% if item.url_assinada %}
                     <img src="{{ item.url_assinada }}" class="max-w-full max-h-full object-contain">
                 {% else %}

@@ -21,8 +21,21 @@ def is_fotografo(user):
 @login_required
 @user_passes_test(is_fotografo)
 def painel_gestao_view(request):
-    galerias = Galeria.objects.filter(fotografo=request.user)
-    return render(request, 'repositorio/painel_gestao.html', {'galerias': galerias})
+    galerias_qs = Galeria.objects.filter(fotografo=request.user).select_related('capa', 'categoria')
+
+    galerias_com_capa = []
+    for g in galerias_qs:
+        url_capa = None
+        if g.capa:
+            path = g.capa.thumbnail.name if g.capa.thumbnail else g.capa.arquivo_processado.name
+            url_capa = gerar_url_assinada_s3(path)
+
+        galerias_com_capa.append({
+            'instancia': g,
+            'url_capa': url_capa
+        })
+
+    return render(request, 'repositorio/painel_gestao.html', {'galerias': galerias_com_capa})
 
 
 @login_required
@@ -75,10 +88,23 @@ def upload_midia_view(request, slug):
             'filename': arquivo.name
         })
 
-    midias = galeria.midias.all().order_by('-criado_em')
+    midias_qs = galeria.midias.all().order_by('-criado_em')
+    midias_com_url = []
+    for m in midias_qs:
+        url_thumb = None
+        if m.thumbnail:
+            url_thumb = gerar_url_assinada_s3(m.thumbnail.name)
+        elif m.arquivo_processado:
+            url_thumb = gerar_url_assinada_s3(m.arquivo_processado.name)
+
+        midias_com_url.append({
+            'instancia': m,
+            'url_thumb': url_thumb
+        })
+
     return render(request, 'repositorio/upload_midia.html', {
         'galeria': galeria,
-        'midias': midias
+        'midias': midias_com_url
     })
 
 
