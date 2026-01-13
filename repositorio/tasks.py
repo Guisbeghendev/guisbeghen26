@@ -6,6 +6,7 @@ from celery import shared_task
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from .models import Midia, MarcaDagua
+from galerias.utils import gerar_url_assinada_s3
 
 
 @shared_task(bind=True)
@@ -52,7 +53,6 @@ def processar_imagem_task(self, midia_id, marca_dagua_id=None, total_arquivos=1,
             img_proc.save(buffer_proc, format='JPEG', quality=85, optimize=True)
             filename = os.path.basename(midia.arquivo_original.name)
 
-            # Ajuste de caminho para bater com a nova pasta acervo/
             midia.arquivo_processado.save(
                 filename,
                 ContentFile(buffer_proc.getvalue()),
@@ -74,10 +74,13 @@ def processar_imagem_task(self, midia_id, marca_dagua_id=None, total_arquivos=1,
             midia.status_processamento = 'disponivel'
             midia.save()
 
-            # Notificação de WebSocket
+            # Notificação de WebSocket com URL Assinada
             channel_layer = get_channel_layer()
             group_name = f"galeria_{midia.galeria.slug}"
             percentual = int((indice_atual / total_arquivos) * 100)
+
+            # GERAÇÃO DA URL ASSINADA PARA O FRONTEND
+            url_thumb_assinada = gerar_url_assinada_s3(midia.thumbnail.name) if midia.thumbnail else ""
 
             async_to_sync(channel_layer.group_send)(
                 group_name,
@@ -88,7 +91,7 @@ def processar_imagem_task(self, midia_id, marca_dagua_id=None, total_arquivos=1,
                     "concluidas": indice_atual,
                     "total": total_arquivos,
                     "status": "disponivel",
-                    "url_thumb": midia.thumbnail.url if midia.thumbnail else ""
+                    "url_thumb": url_thumb_assinada
                 }
             )
 
