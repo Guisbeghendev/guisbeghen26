@@ -154,6 +154,7 @@ def lista_marcas_view(request):
     for m in marcas_qs:
         url_assinada = None
         if m.imagem:
+            # CORREÇÃO AQUI: m.imagem.name em vez de str(m.imagem)
             url_assinada = gerar_url_assinada_s3(m.imagem.name)
         marcas_com_url.append({
             'instancia': m,
