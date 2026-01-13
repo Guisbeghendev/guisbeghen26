@@ -13,12 +13,19 @@ from galerias.utils import gerar_url_assinada_s3
 def is_fotografo(user):
     if not user.is_authenticated:
         return False
-    if user.is_superuser or user.is_staff:
+
+    # Prioridade total para Staff/Superuser (evita olhar para o Profile)
+    if user.is_staff or user.is_superuser:
         return True
 
-    profile = getattr(user, 'profile', None)
-    if profile:
-        return profile.is_fotografo or profile.is_admin_projeto
+    # Para usuários comuns, verifica o Profile de forma segura
+    try:
+        profile = getattr(user, 'profile', None)
+        if profile:
+            return profile.is_fotografo or profile.is_admin_projeto
+    except Exception:
+        pass
+
     return False
 
 
@@ -31,8 +38,14 @@ def painel_gestao_view(request):
     for g in galerias_qs:
         url_capa = None
         if g.capa:
-            path = g.capa.thumbnail.name if g.capa.thumbnail else g.capa.arquivo_processado.name
-            url_capa = gerar_url_assinada_s3(path)
+            path = None
+            if g.capa.thumbnail:
+                path = g.capa.thumbnail.name
+            elif g.capa.arquivo_processado:
+                path = g.capa.arquivo_processado.name
+
+            if path:
+                url_capa = gerar_url_assinada_s3(path)
 
         galerias_com_capa.append({
             'instancia': g,
@@ -229,8 +242,14 @@ def ranking_curtidas_view(request):
         .order_by('-total_likes')
 
     for midia in midias:
+        path_thumb = None
         if midia.thumbnail:
-            midia.url_thumb = gerar_url_assinada_s3(midia.thumbnail.name)
+            path_thumb = midia.thumbnail.name
+        elif midia.arquivo_processado:
+            path_thumb = midia.arquivo_processado.name
+
+        if path_thumb:
+            midia.url_thumb = gerar_url_assinada_s3(path_thumb)
 
     return render(request, 'repositorio/curtidas_ranking.html', {
         'midias': midias,
