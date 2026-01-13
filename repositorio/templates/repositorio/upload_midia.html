@@ -74,7 +74,6 @@ const globalStatusText = document.getElementById('globalStatusText');
 const csrfToken = "{{ csrf_token }}";
 const galeriaSlug = "{{ galeria.slug }}";
 
-// WebSocket para progresso em tempo real
 const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
 const wsUrl = `${protocol}${window.location.host}/ws/galeria/${galeriaSlug}/`;
 const statusSocket = new WebSocket(wsUrl);
@@ -88,47 +87,54 @@ statusSocket.onmessage = function(e) {
         globalPercText.innerText = data.progresso + '%';
         globalStatusText.innerText = `Processando: ${data.concluidas} de ${data.total} imagens`;
 
+        // Atualiza a imagem na grade em tempo real
+        if (data.midia_id) {
+            const midiaElement = document.getElementById(`midia-${data.midia_id}`);
+            if (midiaElement) {
+                const imgContainer = midiaElement.querySelector('.img-container');
+                if (imgContainer && data.url_thumb) {
+                    imgContainer.innerHTML = `<img src="${data.url_thumb}" class="w-full h-full object-cover">`;
+                }
+                midiaElement.querySelector('.overlay-actions').classList.remove('hidden');
+            }
+        }
+
         if (data.status === 'concluido') {
             globalStatusText.innerText = "Processamento concluído com sucesso!";
             globalProgressContainer.classList.add('border-success/50');
             setTimeout(() => {
                 globalProgressContainer.classList.add('hidden');
-                location.reload();
-            }, 3000);
+            }, 5000);
         }
     }
 };
 
 dropzone.onclick = () => fileInput.click();
-dropzone.ondragover = (e) => { e.preventDefault(); dropzone.classList.add('border-primary-purple'); };
-dropzone.ondragleave = () => dropzone.classList.remove('border-primary-purple');
-dropzone.ondrop = (e) => {
-    e.preventDefault();
-    dropzone.classList.remove('border-primary-purple');
-    handleFiles(e.dataTransfer.files);
-};
-
 fileInput.onchange = () => handleFiles(fileInput.files);
 
 function handleFiles(files) {
     const totalFiles = files.length;
     [...files].forEach((file, index) => {
         const uniqueId = 'f' + Math.random().toString(36).substr(2, 9);
-        const item = document.createElement('div');
-        item.id = `queue-${uniqueId}`;
-        item.className = "card-surface bg-surface p-3 rounded flex flex-col gap-2 border border-silver/10";
-        item.innerHTML = `
-            <div class="flex justify-between items-center">
-                <span class="text-silver text-[10px] truncate w-32">${file.name}</span>
-                <span class="text-white text-[10px] font-bold" id="perc-${uniqueId}">0%</span>
-            </div>
-            <div class="w-full bg-black h-1 rounded overflow-hidden">
-                <div id="bar-${uniqueId}" class="bg-primary-purple h-full w-0 transition-all duration-300"></div>
-            </div>
-        `;
-        uploadQueue.appendChild(item);
+        addQueueItem(file.name, uniqueId);
         uploadFile(file, uniqueId, index + 1, totalFiles);
     });
+}
+
+function addQueueItem(name, id) {
+    const item = document.createElement('div');
+    item.id = `queue-${id}`;
+    item.className = "card-surface bg-surface p-3 rounded flex flex-col gap-2 border border-silver/10";
+    item.innerHTML = `
+        <div class="flex justify-between items-center">
+            <span class="text-silver text-[10px] truncate w-32">${name}</span>
+            <span class="text-white text-[10px] font-bold" id="perc-${id}">0%</span>
+        </div>
+        <div class="w-full bg-black h-1 rounded overflow-hidden">
+            <div id="bar-${id}" class="bg-primary-purple h-full w-0 transition-all duration-300"></div>
+        </div>
+    `;
+    uploadQueue.appendChild(item);
 }
 
 function uploadFile(file, uniqueId, currentIndex, totalFiles) {
@@ -145,32 +151,35 @@ function uploadFile(file, uniqueId, currentIndex, totalFiles) {
     xhr.upload.onprogress = (e) => {
         if (e.lengthComputable) {
             const perc = Math.round((e.loaded / e.total) * 100);
-            const bar = document.getElementById(`bar-${uniqueId}`);
-            const percText = document.getElementById(`perc-${uniqueId}`);
-            if (bar) bar.style.width = perc + '%';
-            if (percText) percText.innerText = perc + '%';
+            document.getElementById(`bar-${uniqueId}`).style.width = perc + '%';
+            document.getElementById(`perc-${uniqueId}`).innerText = perc + '%';
         }
     };
 
     xhr.onload = () => {
-        const queueItem = document.getElementById(`queue-${uniqueId}`);
         if (xhr.status === 200) {
-            if (queueItem) {
-                queueItem.classList.add('border-success/50');
-                setTimeout(() => queueItem.remove(), 1000);
-            }
-        } else {
-            if (queueItem) {
-                queueItem.classList.add('border-error/50');
-                document.getElementById(`perc-${uniqueId}`).innerText = 'Erro';
-            }
+            const response = JSON.parse(xhr.responseText);
+            // Cria o placeholder na grade de imagens
+            const placeholder = document.createElement('div');
+            placeholder.id = `midia-${response.midia_id}`;
+            placeholder.className = "relative group aspect-square bg-black border border-silver/10 overflow-hidden";
+            placeholder.innerHTML = `
+                <div class="img-container w-full h-full flex items-center justify-center text-silver/20">
+                    <i class="fas fa-sync fa-spin"></i>
+                </div>
+                <div class="overlay-actions absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center gap-2 hidden">
+                    <button onclick="excluirMidia(${response.midia_id})" class="text-[10px] text-error uppercase font-bold"><i class="fas fa-trash"></i> Excluir</button>
+                </div>
+            `;
+            mediaGrid.prepend(placeholder);
+            document.getElementById(`queue-${uniqueId}`).remove();
         }
     };
     xhr.send(formData);
 }
 
 function excluirMidia(id) {
-    if(!confirm('Deseja excluir permanentemente esta mídia do repositório?')) return;
+    if(!confirm('Excluir esta mídia?')) return;
     fetch(`/repositorio/midia/${id}/excluir/`, {
         method: 'POST',
         headers: { 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' }

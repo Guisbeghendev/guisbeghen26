@@ -8,7 +8,6 @@ from asgiref.sync import async_to_sync
 from .models import Midia, MarcaDagua
 from galerias.utils import gerar_url_assinada_s3
 
-
 @shared_task(bind=True)
 def processar_imagem_task(self, midia_id, marca_dagua_id=None, total_arquivos=1, indice_atual=1, opacidade=50):
     try:
@@ -16,7 +15,6 @@ def processar_imagem_task(self, midia_id, marca_dagua_id=None, total_arquivos=1,
         midia.status_processamento = 'processando'
         midia.save(update_fields=['status_processamento'])
 
-        # Processamento de Imagem
         with Image.open(midia.arquivo_original) as img_original:
             if img_original.mode != 'RGB':
                 img_original = img_original.convert('RGB')
@@ -30,7 +28,6 @@ def processar_imagem_task(self, midia_id, marca_dagua_id=None, total_arquivos=1,
                         if watermark.mode != 'RGBA':
                             watermark = watermark.convert('RGBA')
 
-                        # Aplica opacidade dinâmica
                         alpha = watermark.getchannel('A')
                         novo_alpha = alpha.point(lambda i: i * (float(opacidade) / 100))
                         watermark.putalpha(novo_alpha)
@@ -43,43 +40,27 @@ def processar_imagem_task(self, midia_id, marca_dagua_id=None, total_arquivos=1,
 
                         pos_x = img_proc.size[0] - watermark.size[0] - 20
                         pos_y = img_proc.size[1] - watermark.size[1] - 20
-
                         img_proc.paste(watermark, (pos_x, pos_y), watermark)
-                except Exception:
+                except:
                     pass
 
-            # Salvar Processada
             buffer_proc = BytesIO()
             img_proc.save(buffer_proc, format='JPEG', quality=85, optimize=True)
             filename = os.path.basename(midia.arquivo_original.name)
+            midia.arquivo_processado.save(filename, ContentFile(buffer_proc.getvalue()), save=False)
 
-            midia.arquivo_processado.save(
-                filename,
-                ContentFile(buffer_proc.getvalue()),
-                save=False
-            )
-
-            # Gerar Thumbnail
             img_thumb = img_original.copy()
             img_thumb.thumbnail((400, 400), Image.Resampling.LANCZOS)
             buffer_thumb = BytesIO()
             img_thumb.save(buffer_thumb, format='JPEG', quality=75)
-
-            midia.thumbnail.save(
-                filename,
-                ContentFile(buffer_thumb.getvalue()),
-                save=False
-            )
+            midia.thumbnail.save(filename, ContentFile(buffer_thumb.getvalue()), save=False)
 
             midia.status_processamento = 'disponivel'
             midia.save()
 
-            # Notificação de WebSocket com URL Assinada
             channel_layer = get_channel_layer()
             group_name = f"galeria_{midia.galeria.slug}"
             percentual = int((indice_atual / total_arquivos) * 100)
-
-            # GERAÇÃO DA URL ASSINADA PARA O FRONTEND
             url_thumb_assinada = gerar_url_assinada_s3(midia.thumbnail.name) if midia.thumbnail else ""
 
             async_to_sync(channel_layer.group_send)(
@@ -90,7 +71,7 @@ def processar_imagem_task(self, midia_id, marca_dagua_id=None, total_arquivos=1,
                     "progresso": percentual,
                     "concluidas": indice_atual,
                     "total": total_arquivos,
-                    "status": "disponivel",
+                    "status": "concluido" if indice_atual == total_arquivos else "processando",
                     "url_thumb": url_thumb_assinada
                 }
             )
