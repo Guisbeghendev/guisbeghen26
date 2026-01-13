@@ -20,7 +20,7 @@
         <div class="card-surface bg-surface rounded-lg overflow-hidden border border-silver/5 flex flex-col">
             <div class="h-40 bg-black flex items-center justify-center p-4">
                 {% if item.url_assinada %}
-                    <img src="{{ item.url_assinada }}" class="max-w-full max-h-full object-contain">
+                    <img src="{{ item.url_assinada|safe }}" class="max-w-full max-h-full object-contain">
                 {% else %}
                     <div class="w-full h-full flex items-center justify-center opacity-10">
                         <i class="fas fa-image text-xl"></i>
