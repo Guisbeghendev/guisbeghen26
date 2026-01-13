@@ -13,35 +13,29 @@ from galerias.utils import gerar_url_assinada_s3
 def is_fotografo(user):
     if not user.is_authenticated:
         return False
-
-    # Prioridade total para Staff/Superuser (evita olhar para o Profile)
-    if user.is_staff or user.is_superuser:
+    # Superusuários e Staff ignoram verificações de perfil
+    if user.is_superuser or user.is_staff:
         return True
 
-    # Para usuários comuns, verifica o Profile de forma segura
-    try:
-        profile = getattr(user, 'profile', None)
-        if profile:
-            return profile.is_fotografo or profile.is_admin_projeto
-    except Exception:
-        pass
-
-    return False
+    profile = getattr(user, 'profile', None)
+    return profile and (profile.is_fotografo or profile.is_admin_projeto)
 
 
 @login_required
 @user_passes_test(is_fotografo)
 def painel_gestao_view(request):
+    # Obtém galerias onde o usuário logado é o fotógrafo autor
     galerias_qs = Galeria.objects.filter(fotografo=request.user).select_related('capa', 'categoria')
 
     galerias_com_capa = []
     for g in galerias_qs:
         url_capa = None
         if g.capa:
+            # Correção da lógica de busca do path para evitar erro de atributo
             path = None
-            if g.capa.thumbnail:
+            if hasattr(g.capa, 'thumbnail') and g.capa.thumbnail:
                 path = g.capa.thumbnail.name
-            elif g.capa.arquivo_processado:
+            elif hasattr(g.capa, 'arquivo_processado') and g.capa.arquivo_processado:
                 path = g.capa.arquivo_processado.name
 
             if path:
@@ -109,10 +103,9 @@ def upload_midia_view(request, slug):
     midias_com_url = []
     for m in midias_qs:
         url_thumb = None
-        if m.thumbnail:
-            url_thumb = gerar_url_assinada_s3(m.thumbnail.name)
-        elif m.arquivo_processado:
-            url_thumb = gerar_url_assinada_s3(m.arquivo_processado.name)
+        path_thumb = m.thumbnail.name if m.thumbnail else (m.arquivo_processado.name if m.arquivo_processado else None)
+        if path_thumb:
+            url_thumb = gerar_url_assinada_s3(path_thumb)
 
         midias_com_url.append({
             'instancia': m,
@@ -219,8 +212,6 @@ def alterar_status_galeria_view(request, slug, novo_status):
 @user_passes_test(is_fotografo)
 def ranking_curtidas_view(request):
     midias_query = Midia.objects.filter(status_processamento='disponivel')
-    galerias_filtro = Galeria.objects.filter(fotografo=request.user)
-
     if not request.user.is_superuser:
         midias_query = midias_query.filter(galeria__fotografo=request.user)
 
@@ -242,18 +233,13 @@ def ranking_curtidas_view(request):
         .order_by('-total_likes')
 
     for midia in midias:
-        path_thumb = None
-        if midia.thumbnail:
-            path_thumb = midia.thumbnail.name
-        elif midia.arquivo_processado:
-            path_thumb = midia.arquivo_processado.name
-
-        if path_thumb:
-            midia.url_thumb = gerar_url_assinada_s3(path_thumb)
+        path_thumb = midia.thumbnail.name if midia.thumbnail else (
+            midia.arquivo_processado.name if midia.arquivo_processado else None)
+        midia.url_thumb = gerar_url_assinada_s3(path_thumb) if path_thumb else None
 
     return render(request, 'repositorio/curtidas_ranking.html', {
         'midias': midias,
-        'galerias_filtro': galerias_filtro
+        'galerias_filtro': Galeria.objects.filter(fotografo=request.user)
     })
 
 
