@@ -31,7 +31,7 @@ def processar_imagem_task(self, midia_id, marca_dagua_id=None, total_arquivos=1,
 
                         # Aplica opacidade dinâmica
                         alpha = watermark.getchannel('A')
-                        novo_alpha = alpha.point(lambda i: i * (opacidade / 100))
+                        novo_alpha = alpha.point(lambda i: i * (float(opacidade) / 100))
                         watermark.putalpha(novo_alpha)
 
                         w_width, w_height = watermark.size
@@ -52,8 +52,9 @@ def processar_imagem_task(self, midia_id, marca_dagua_id=None, total_arquivos=1,
             img_proc.save(buffer_proc, format='JPEG', quality=85, optimize=True)
             filename = os.path.basename(midia.arquivo_original.name)
 
+            # Ajuste de caminho para bater com a nova pasta acervo/
             midia.arquivo_processado.save(
-                f"proc_{filename}",
+                filename,
                 ContentFile(buffer_proc.getvalue()),
                 save=False
             )
@@ -65,7 +66,7 @@ def processar_imagem_task(self, midia_id, marca_dagua_id=None, total_arquivos=1,
             img_thumb.save(buffer_thumb, format='JPEG', quality=75)
 
             midia.thumbnail.save(
-                f"thumb_{filename}",
+                filename,
                 ContentFile(buffer_thumb.getvalue()),
                 save=False
             )
@@ -73,20 +74,21 @@ def processar_imagem_task(self, midia_id, marca_dagua_id=None, total_arquivos=1,
             midia.status_processamento = 'disponivel'
             midia.save()
 
-            # Notificação de Progresso (Leve)
+            # Notificação de WebSocket
             channel_layer = get_channel_layer()
             group_name = f"galeria_{midia.galeria.slug}"
-
             percentual = int((indice_atual / total_arquivos) * 100)
 
             async_to_sync(channel_layer.group_send)(
                 group_name,
                 {
                     "type": "notificar_progresso",
+                    "midia_id": midia.id,
                     "progresso": percentual,
                     "concluidas": indice_atual,
                     "total": total_arquivos,
-                    "status": "processando" if indice_atual < total_arquivos else "concluido"
+                    "status": "disponivel",
+                    "url_thumb": midia.thumbnail.url if midia.thumbnail else ""
                 }
             )
 
