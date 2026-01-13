@@ -4,6 +4,7 @@ from django.http import JsonResponse
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Count, Q
+from django.db import transaction
 from .models import Galeria, Midia, MarcaDagua, Categoria, ConfiguracaoHome
 from .forms import GaleriaForm, MarcaDaguaForm, ConfiguracaoHomeForm
 from .tasks import processar_imagem_task
@@ -13,7 +14,6 @@ from galerias.utils import gerar_url_assinada_s3
 def is_fotografo(user):
     if not user.is_authenticated:
         return False
-    # Superusuários e Staff ignoram verificações de perfil
     if user.is_superuser or user.is_staff:
         return True
 
@@ -24,14 +24,12 @@ def is_fotografo(user):
 @login_required
 @user_passes_test(is_fotografo)
 def painel_gestao_view(request):
-    # Obtém galerias onde o usuário logado é o fotógrafo autor
     galerias_qs = Galeria.objects.filter(fotografo=request.user).select_related('capa', 'categoria')
 
     galerias_com_capa = []
     for g in galerias_qs:
         url_capa = None
         if g.capa:
-            # Correção da lógica de busca do path para evitar erro de atributo
             path = None
             if hasattr(g.capa, 'thumbnail') and g.capa.thumbnail:
                 path = g.capa.thumbnail.name
@@ -78,20 +76,22 @@ def upload_midia_view(request, slug):
         indice = int(request.POST.get('current_index', 1))
         opacidade = int(request.POST.get('opacidade', 50))
 
-        midia = Midia.objects.create(
-            galeria=galeria,
-            arquivo_original=arquivo,
-            status_processamento='pendente'
-        )
+        with transaction.atomic():
+            midia = Midia.objects.create(
+                galeria=galeria,
+                arquivo_original=arquivo,
+                status_processamento='pendente'
+            )
 
-        marca_id = galeria.marca_dagua_padrao.id if galeria.marca_dagua_padrao else None
-        processar_imagem_task.delay(
-            midia_id=midia.id,
-            marca_dagua_id=marca_id,
-            total_arquivos=total,
-            indice_atual=indice,
-            opacidade=opacidade
-        )
+            marca_id = galeria.marca_dagua_padrao.id if galeria.marca_dagua_padrao else None
+
+            transaction.on_commit(lambda: processar_imagem_task.delay(
+                midia_id=midia.id,
+                marca_dagua_id=marca_id,
+                total_arquivos=total,
+                indice_atual=indice,
+                opacidade=opacidade
+            ))
 
         return JsonResponse({
             'status': 'success',

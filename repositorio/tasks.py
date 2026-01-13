@@ -49,28 +49,23 @@ def processar_imagem_task(self, midia_id, marca_dagua_id=None, total_arquivos=1,
             img_proc.save(buffer_proc, format='JPEG', quality=85, optimize=True)
             filename = os.path.basename(midia.arquivo_original.name)
 
-            # O save=False é vital aqui para não disparar o save() global prematuro
-            midia.arquivo_processado.save(filename, ContentFile(buffer_proc.getvalue()), save=False)
+            midia.arquivo_processado.save(f"proc_{filename}", ContentFile(buffer_proc.getvalue()), save=False)
 
             img_thumb = img_original.copy()
             img_thumb.thumbnail((400, 400), Image.Resampling.LANCZOS)
             buffer_thumb = BytesIO()
             img_thumb.save(buffer_thumb, format='JPEG', quality=75)
-            midia.thumbnail.save(filename, ContentFile(buffer_thumb.getvalue()), save=False)
+            midia.thumbnail.save(f"thumb_{filename}", ContentFile(buffer_thumb.getvalue()), save=False)
 
-            # CORREÇÃO CRÍTICA:
-            # 1. Definimos o status.
             midia.status_processamento = 'disponivel'
-            # 2. Salvamos APENAS os campos alterados para evitar limpar os metadados do S3.
             midia.save(update_fields=['status_processamento', 'arquivo_processado', 'thumbnail'])
-            # 3. Recarregamos do DB para garantir que temos as URLs finais do S3.
+
             midia.refresh_from_db()
 
             channel_layer = get_channel_layer()
             group_name = f"galeria_{midia.galeria.slug}"
             percentual = int((indice_atual / total_arquivos) * 100)
 
-            # Garante que pegamos o path correto após o refresh
             path_thumb = midia.thumbnail.name if midia.thumbnail else midia.arquivo_processado.name
             url_thumb_assinada = gerar_url_assinada_s3(path_thumb) if path_thumb else ""
 
