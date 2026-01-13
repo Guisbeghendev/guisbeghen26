@@ -8,6 +8,7 @@ from asgiref.sync import async_to_sync
 from .models import Midia, MarcaDagua
 from galerias.utils import gerar_url_assinada_s3
 
+
 @shared_task(bind=True)
 def processar_imagem_task(self, midia_id, marca_dagua_id=None, total_arquivos=1, indice_atual=1, opacidade=50):
     try:
@@ -47,6 +48,8 @@ def processar_imagem_task(self, midia_id, marca_dagua_id=None, total_arquivos=1,
             buffer_proc = BytesIO()
             img_proc.save(buffer_proc, format='JPEG', quality=85, optimize=True)
             filename = os.path.basename(midia.arquivo_original.name)
+
+            # O save=False é vital aqui para não disparar o save() global prematuro
             midia.arquivo_processado.save(filename, ContentFile(buffer_proc.getvalue()), save=False)
 
             img_thumb = img_original.copy()
@@ -55,13 +58,21 @@ def processar_imagem_task(self, midia_id, marca_dagua_id=None, total_arquivos=1,
             img_thumb.save(buffer_thumb, format='JPEG', quality=75)
             midia.thumbnail.save(filename, ContentFile(buffer_thumb.getvalue()), save=False)
 
+            # CORREÇÃO CRÍTICA:
+            # 1. Definimos o status.
             midia.status_processamento = 'disponivel'
-            midia.save()
+            # 2. Salvamos APENAS os campos alterados para evitar limpar os metadados do S3.
+            midia.save(update_fields=['status_processamento', 'arquivo_processado', 'thumbnail'])
+            # 3. Recarregamos do DB para garantir que temos as URLs finais do S3.
+            midia.refresh_from_db()
 
             channel_layer = get_channel_layer()
             group_name = f"galeria_{midia.galeria.slug}"
             percentual = int((indice_atual / total_arquivos) * 100)
-            url_thumb_assinada = gerar_url_assinada_s3(midia.thumbnail.name) if midia.thumbnail else ""
+
+            # Garante que pegamos o path correto após o refresh
+            path_thumb = midia.thumbnail.name if midia.thumbnail else midia.arquivo_processado.name
+            url_thumb_assinada = gerar_url_assinada_s3(path_thumb) if path_thumb else ""
 
             async_to_sync(channel_layer.group_send)(
                 group_name,
