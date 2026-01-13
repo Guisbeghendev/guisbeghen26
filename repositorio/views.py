@@ -11,11 +11,15 @@ from galerias.utils import gerar_url_assinada_s3
 
 
 def is_fotografo(user):
-    return user.is_authenticated and (
-            getattr(user.profile, 'is_fotografo', False) or
-            user.is_staff or
-            getattr(user.profile, 'is_admin_projeto', False)
-    )
+    if not user.is_authenticated:
+        return False
+    if user.is_superuser or user.is_staff:
+        return True
+
+    profile = getattr(user, 'profile', None)
+    if profile:
+        return profile.is_fotografo or profile.is_admin_projeto
+    return False
 
 
 @login_required
@@ -154,7 +158,6 @@ def lista_marcas_view(request):
     for m in marcas_qs:
         url_assinada = None
         if m.imagem:
-            # CORREÇÃO AQUI: m.imagem.name em vez de str(m.imagem)
             url_assinada = gerar_url_assinada_s3(m.imagem.name)
         marcas_com_url.append({
             'instancia': m,
@@ -208,7 +211,6 @@ def ranking_curtidas_view(request):
     if not request.user.is_superuser:
         midias_query = midias_query.filter(galeria__fotografo=request.user)
 
-    # Filtros
     data_inicio = request.GET.get('data_inicio')
     data_fim = request.GET.get('data_fim')
     galeria_id = request.GET.get('galeria_id')
