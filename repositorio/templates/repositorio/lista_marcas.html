@@ -16,15 +16,21 @@
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {% for marca in marcas %}
+        {% for item in marcas %}
         <div class="card-surface bg-surface rounded-lg overflow-hidden border border-silver/5 flex flex-col">
             <div class="h-40 bg-black flex items-center justify-center p-4">
-                {# As marcas d'água são servidas pelo S3 conforme configurado no Model #}
-                <img src="{{ marca.imagem.url }}" class="max-w-full max-h-full object-contain">
+                {# Ajustado para usar item.url_assinada conforme definido na view #}
+                {% if item.url_assinada %}
+                    <img src="{{ item.url_assinada }}" class="max-w-full max-h-full object-contain">
+                {% else %}
+                    <div class="w-full h-full flex items-center justify-center opacity-10">
+                        <i class="fas fa-image text-xl"></i>
+                    </div>
+                {% endif %}
             </div>
             <div class="p-4 border-t border-silver/10 flex justify-between items-center">
-                <span class="text-white text-xs uppercase font-bold truncate">{{ marca.nome }}</span>
-                <span class="text-silver text-[9px]">{{ marca.criado_em|date:"d/m/Y" }}</span>
+                <span class="text-white text-xs uppercase font-bold truncate">{{ item.instancia.nome }}</span>
+                <span class="text-silver text-[9px]">{{ item.instancia.criado_em|date:"d/m/Y" }}</span>
             </div>
         </div>
         {% empty %}

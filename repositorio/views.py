@@ -123,8 +123,17 @@ def excluir_midia_view(request, pk):
 @login_required
 @user_passes_test(is_fotografo)
 def lista_marcas_view(request):
-    marcas = MarcaDagua.objects.filter(fotografo=request.user)
-    return render(request, 'repositorio/lista_marcas.html', {'marcas': marcas})
+    marcas_qs = MarcaDagua.objects.filter(fotografo=request.user)
+    marcas_com_url = []
+    for m in marcas_qs:
+        url_assinada = None
+        if m.imagem:
+            url_assinada = gerar_url_assinada_s3(m.imagem.name)
+        marcas_com_url.append({
+            'instancia': m,
+            'url_assinada': url_assinada
+        })
+    return render(request, 'repositorio/lista_marcas.html', {'marcas': marcas_com_url})
 
 
 @login_required
