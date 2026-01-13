@@ -19,7 +19,6 @@ class GaleriaConsumer(AsyncWebsocketConsumer):
         )
 
     async def notificar_progresso(self, event):
-        # Repassa todos os dados necessários para o frontend identificar a mídia
         await self.send(text_data=json.dumps({
             'midia_id': event.get('midia_id'),
             'progresso': event.get('progresso'),
