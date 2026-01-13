@@ -10,13 +10,21 @@ from galerias.utils import gerar_url_assinada_s3
 
 
 @shared_task(bind=True)
-def processar_imagem_task(self, midia_id, marca_dagua_id=None, total_arquivos=1, indice_atual=1, opacidade=50):
+def processar_imagem_task(self, midia_id, marca_dagua_id=None, total_arquivos=1, indice_atual=1, opacidade=50, rotacao=0):
     try:
         midia = Midia.objects.select_related('galeria').get(id=midia_id)
         midia.status_processamento = 'processando'
         midia.save(update_fields=['status_processamento'])
 
-        # CORREÇÃO: Uso de .open() para garantir leitura correta do S3 em ambiente distribuído
+        if rotacao != 0:
+            with midia.arquivo_original.open('rb') as f_orig:
+                with Image.open(f_orig) as img_to_rotate:
+                    img_rotated = img_to_rotate.rotate(rotacao, expand=True)
+                    buffer_rot = BytesIO()
+                    img_rotated.save(buffer_rot, format='JPEG', quality=95)
+                    filename = os.path.basename(midia.arquivo_original.name)
+                    midia.arquivo_original.save(filename, ContentFile(buffer_rot.getvalue()), save=False)
+
         with midia.arquivo_original.open('rb') as f_orig:
             with Image.open(f_orig) as img_original:
                 if img_original.mode != 'RGB':
@@ -52,7 +60,6 @@ def processar_imagem_task(self, midia_id, marca_dagua_id=None, total_arquivos=1,
                 img_proc.save(buffer_proc, format='JPEG', quality=85, optimize=True)
                 filename = os.path.basename(midia.arquivo_original.name)
 
-                # CORREÇÃO: save=False para evitar colisões e garantir persistência atômica no final
                 midia.arquivo_processado.save(f"proc_{filename}", ContentFile(buffer_proc.getvalue()), save=False)
 
                 img_thumb = img_original.copy()
@@ -62,7 +69,7 @@ def processar_imagem_task(self, midia_id, marca_dagua_id=None, total_arquivos=1,
                 midia.thumbnail.save(f"thumb_{filename}", ContentFile(buffer_thumb.getvalue()), save=False)
 
                 midia.status_processamento = 'disponivel'
-                midia.save(update_fields=['status_processamento', 'arquivo_processado', 'thumbnail'])
+                midia.save(update_fields=['status_processamento', 'arquivo_processado', 'thumbnail', 'arquivo_original'])
 
                 midia.refresh_from_db()
 

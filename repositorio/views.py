@@ -76,7 +76,6 @@ def upload_midia_view(request, slug):
         indice = int(request.POST.get('current_index', 1))
         opacidade = int(request.POST.get('opacidade', 50))
 
-        # CORREÇÃO: transaction.atomic + on_commit garante que o arquivo esteja pronto no storage antes da task iniciar
         with transaction.atomic():
             midia = Midia.objects.create(
                 galeria=galeria,
@@ -155,6 +154,18 @@ def excluir_midia_view(request, pk):
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return JsonResponse({'status': 'deleted'})
     return redirect('repositorio:upload_midia', slug=slug)
+
+
+@login_required
+@user_passes_test(is_fotografo)
+def rotacionar_midia_view(request, pk, direcao):
+    midia = get_object_or_404(Midia, pk=pk, galeria__fotografo=request.user)
+    processar_imagem_task.delay(
+        midia_id=midia.id,
+        marca_dagua_id=midia.galeria.marca_dagua_padrao.id if midia.galeria.marca_dagua_padrao else None,
+        rotacao=90 if direcao == 'direita' else -90
+    )
+    return JsonResponse({'status': 'processing'})
 
 
 @login_required

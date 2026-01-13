@@ -17,6 +17,7 @@ urlpatterns = [
     path('galeria/<slug:slug>/upload/', views.upload_midia_view, name='upload_midia'),
     path('midia/<int:pk>/definir-capa/', views.definir_capa_view, name='definir_capa'),
     path('midia/<int:pk>/excluir/', views.excluir_midia_view, name='excluir_midia'),
+    path('midia/<int:pk>/rotacionar/<str:direcao>/', views.rotacionar_midia_view, name='rotacionar_midia'),
 
     # Marcas D'água
     path('marcas/', views.lista_marcas_view, name='lista_marcas'),
@@ -26,5 +27,5 @@ urlpatterns = [
     path('ranking/', views.ranking_curtidas_view, name='ranking_curtidas'),
 
     # Gestão da Home (Hero e Destaque)
-    path('gestao-home/', views.gestao_home_view, name='gestao_home'), # ADICIONADO
+    path('gestao-home/', views.gestao_home_view, name='gestao_home'),
 ]

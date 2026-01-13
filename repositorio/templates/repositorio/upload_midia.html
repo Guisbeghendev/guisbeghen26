@@ -49,6 +49,16 @@
 
                 <div class="overlay-actions absolute inset-0 bg-black/80 opacity-0 group-hover:opacity-100 transition-all flex flex-col items-center justify-center gap-2 {% if midia.instancia.status_processamento != 'disponivel' %}hidden{% endif %}">
                     <a href="{% url 'repositorio:definir_capa' midia.instancia.pk %}" class="text-[10px] text-white uppercase font-bold hover:text-success"><i class="fas fa-star mr-1"></i> Capa</a>
+
+                    <div class="flex gap-4 my-1">
+                        <button onclick="rotacionarMidia({{ midia.instancia.id }}, 'esquerda')" class="text-white hover:text-primary-purple transition-colors" title="Girar 90º Esquerda">
+                            <i class="fas fa-undo-alt"></i>
+                        </button>
+                        <button onclick="rotacionarMidia({{ midia.instancia.id }}, 'direita')" class="text-white hover:text-primary-purple transition-colors" title="Girar 90º Direita">
+                            <i class="fas fa-redo-alt"></i>
+                        </button>
+                    </div>
+
                     <button onclick="excluirMidia({{ midia.instancia.id }})" class="text-[10px] text-error uppercase font-bold"><i class="fas fa-trash"></i> Excluir</button>
                 </div>
 
@@ -87,15 +97,14 @@ statusSocket.onmessage = function(e) {
         globalPercText.innerText = data.progresso + '%';
         globalStatusText.innerText = `Processando: ${data.concluidas} de ${data.total} imagens`;
 
-        // CORREÇÃO: Busca do elemento e injeção da URL assinada recebida via WebSocket
         if (data.midia_id) {
             const midiaElement = document.getElementById(`midia-${data.midia_id}`);
             if (midiaElement) {
                 const imgContainer = midiaElement.querySelector('.img-container');
                 if (imgContainer && data.url_thumb) {
+                    imgContainer.classList.remove('opacity-30');
                     imgContainer.innerHTML = `<img src="${data.url_thumb}" class="w-full h-full object-cover">`;
                 }
-                // Habilita as ações do overlay após processamento
                 const overlay = midiaElement.querySelector('.overlay-actions');
                 if(overlay) overlay.classList.remove('hidden');
             }
@@ -161,7 +170,6 @@ function uploadFile(file, uniqueId, currentIndex, totalFiles) {
     xhr.onload = () => {
         if (xhr.status === 200) {
             const response = JSON.parse(xhr.responseText);
-            // Cria o placeholder na grade de imagens
             const placeholder = document.createElement('div');
             placeholder.id = `midia-${response.midia_id}`;
             placeholder.className = "relative group aspect-square bg-black border border-silver/10 overflow-hidden";
@@ -187,6 +195,18 @@ function excluirMidia(id) {
         headers: { 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' }
     }).then(res => res.json()).then(data => {
         if(data.status === 'deleted') document.getElementById(`midia-${id}`).remove();
+    });
+}
+
+function rotacionarMidia(id, direcao) {
+    const midiaElement = document.getElementById(`midia-${id}`);
+    const imgContainer = midiaElement.querySelector('.img-container');
+    imgContainer.classList.add('opacity-30');
+    imgContainer.innerHTML = '<div class="w-full h-full flex items-center justify-center text-silver/20"><i class="fas fa-sync fa-spin"></i></div>';
+
+    fetch(`/repositorio/midia/${id}/rotacionar/${direcao}/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': csrfToken, 'X-Requested-With': 'XMLHttpRequest' }
     });
 }
 </script>
