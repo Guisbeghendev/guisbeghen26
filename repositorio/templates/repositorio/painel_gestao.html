@@ -4,16 +4,15 @@
 
 {% block content %}
 <div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-8 border-b border-silver/10 pb-6">
+    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 border-b border-silver/10 pb-6 gap-4">
         <div>
             <h1 class="text-3xl font-bold text-primary-purple uppercase tracking-tighter">Painel de Gestão</h1>
             <p class="text-silver">Gerencie seu acervo fotográfico</p>
         </div>
-        <div class="flex gap-4">
+        <div class="flex flex-wrap gap-4">
             <a href="{% url 'repositorio:gestao_home' %}" class="px-4 py-2 border border-primary-purple text-primary-purple hover:bg-primary-purple hover:text-white transition-all text-xs uppercase font-bold tracking-widest">
                 <i class="fas fa-image mr-2"></i> Destaque da Home
             </a>
-
             <a href="{% url 'repositorio:ranking_curtidas' %}" class="px-4 py-2 border border-success text-success hover:bg-success hover:text-white transition-all text-xs uppercase font-bold tracking-widest">
                 <i class="fas fa-trophy mr-2"></i> Ranking de Curtidas
             </a>
@@ -21,6 +20,40 @@
             <a href="{% url 'repositorio:criar_galeria' %}" class="px-4 py-2 bg-primary-purple hover:bg-purple-hover text-white transition-all text-xs uppercase font-bold tracking-widest">Nova Galeria</a>
         </div>
     </div>
+
+    <form method="GET" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-10 bg-surface p-4 rounded-lg border border-silver/5">
+        <div>
+            <label class="block text-silver text-[10px] uppercase font-bold mb-2">Status</label>
+            <select name="status" class="w-full bg-black border border-silver/20 text-white text-xs p-2 rounded focus:border-primary-purple outline-none">
+                <option value="">Todos</option>
+                {% for code, label in status_choices %}
+                    <option value="{{ code }}" {% if filtros.status == code %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="block text-silver text-[10px] uppercase font-bold mb-2">Ano</label>
+            <select name="ano" class="w-full bg-black border border-silver/20 text-white text-xs p-2 rounded focus:border-primary-purple outline-none">
+                <option value="">Todos</option>
+                {% for ano in anos %}
+                    <option value="{{ ano.year }}" {% if filtros.ano == ano.year|stringformat:"s" %}selected{% endif %}>{{ ano.year }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>
+            <label class="block text-silver text-[10px] uppercase font-bold mb-2">Mês</label>
+            <select name="mes" class="w-full bg-black border border-silver/20 text-white text-xs p-2 rounded focus:border-primary-purple outline-none">
+                <option value="">Todos</option>
+                {% for num, nome in meses %}
+                    <option value="{{ num }}" {% if filtros.mes == num|stringformat:"s" %}selected{% endif %}>{{ nome }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="flex items-end gap-2">
+            <button type="submit" class="flex-1 bg-silver/10 hover:bg-silver/20 text-white text-[10px] font-bold uppercase py-2 px-4 rounded transition-all">Filtrar</button>
+            <a href="{% url 'repositorio:painel_gestao' %}" class="bg-error/10 hover:bg-error/20 text-error text-[10px] font-bold uppercase py-2 px-4 rounded transition-all">Limpar</a>
+        </div>
+    </form>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for item in galerias %}
@@ -62,7 +95,7 @@
         </div>
         {% empty %}
         <div class="col-span-full py-20 text-center border-2 border-dashed border-silver/10">
-            <p class="text-silver uppercase tracking-widest text-sm">Nenhuma galeria encontrada.</p>
+            <p class="text-silver uppercase tracking-widest text-sm">Nenhuma galeria encontrada para os filtros aplicados.</p>
         </div>
         {% endfor %}
     </div>

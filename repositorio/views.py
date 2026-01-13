@@ -24,7 +24,33 @@ def is_fotografo(user):
 @login_required
 @user_passes_test(is_fotografo)
 def painel_gestao_view(request):
+    # Filtros e Ordenação
+    status_filtro = request.GET.get('status')
+    ano_filtro = request.GET.get('ano')
+    mes_filtro = request.GET.get('mes')
+
     galerias_qs = Galeria.objects.filter(fotografo=request.user).select_related('capa', 'categoria')
+
+    if status_filtro:
+        galerias_qs = galerias_qs.filter(status=status_filtro)
+
+    if ano_filtro:
+        galerias_qs = galerias_qs.filter(data_evento__year=ano_filtro)
+
+    if mes_filtro:
+        galerias_qs = galerias_qs.filter(data_evento__month=mes_filtro)
+
+    # Ordenação: Mais nova (data_evento) primeiro
+    galerias_qs = galerias_qs.order_by('-data_evento', '-criado_em')
+
+    # Dados para os selects de filtro
+    anos_disponiveis = Galeria.objects.filter(fotografo=request.user).dates('data_evento', 'year', order='DESC')
+
+    meses_nomes = [
+        (1, 'Janeiro'), (2, 'Fevereiro'), (3, 'Março'), (4, 'Abril'),
+        (5, 'Maio'), (6, 'Junho'), (7, 'Julho'), (8, 'Agosto'),
+        (9, 'Setembro'), (10, 'Outubro'), (11, 'Novembro'), (12, 'Dezembro')
+    ]
 
     galerias_com_capa = []
     for g in galerias_qs:
@@ -44,7 +70,19 @@ def painel_gestao_view(request):
             'url_capa': url_capa
         })
 
-    return render(request, 'repositorio/painel_gestao.html', {'galerias': galerias_com_capa})
+    context = {
+        'galerias': galerias_com_capa,
+        'anos': anos_disponiveis,
+        'meses': meses_nomes,
+        'status_choices': Galeria.STATUS_CHOICES,
+        'filtros': {
+            'status': status_filtro,
+            'ano': ano_filtro,
+            'mes': mes_filtro
+        }
+    }
+
+    return render(request, 'repositorio/painel_gestao.html', context)
 
 
 @login_required
